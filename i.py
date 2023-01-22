@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 import asyncio
 import streamlit as st
 import os
+import sys
 
 SCOPES_ANALYTICS = ['https://www.googleapis.com/auth/yt-analytics.readonly']
 API_SERVICE_NAME_ANALYTICS = 'youtubeAnalytics'
@@ -17,8 +18,18 @@ API_VERSION_YOUYUBE = 'v3'
 
 CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILE.json'
 
+def credentials_to_dict(credentials):
+  return {'token': credentials.token,
+          'refresh_token': credentials.refresh_token,
+          'token_uri': credentials.token_uri,
+          'client_id': credentials.client_id,
+          'client_secret': credentials.client_secret,
+          'scopes': credentials.scopes}
+
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES_ANALYTICS)
+
 flow.redirect_uri = 'http://localhost:8501'
+
 authorization_url, state = flow.authorization_url(
   access_type='offline',
   # state=sample_passthrough_value,
@@ -31,21 +42,33 @@ def get_login_str():
   <a target="_self"
   href="{authorization_url}">Google login</a>'''
 
+fruits_dict = {}
+
+# if 'credentials'  not in st.session_state:
+#   st.session_state = {}
+#   st.write(get_login_str(),unsafe_allow_html=True)
+
 st.write(get_login_str(),unsafe_allow_html=True)
-# authorization_state = st.experimental_get_query_params()['state']
-# state = authorization_state[0]
-# authorization_code = st.experimental_get_query_params()['code']
-# code = authorization_code[0]
-# authorization_scope = st.experimental_get_query_params()['scope']
-# scope = authorization_code[0]
-# authorization_response = "localhost:8501/?state="+state+"&code="+code+"&scope="+scope
-if 'code' in st.experimental_get_query_params():
-  authorization_response = st.experimental_get_query_params()['code']
-  authorization_response=authorization_response[0]
+
+if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_state:
+  if  'credentials' in st.session_state:
+    credentials = google.oauth2.credentials.Credentials(
+    **st.session_state['credentials'])
+    st.session_state['credentials']=credentials_to_dict(credentials)
+  else:
+    authorization_response = st.experimental_get_query_params()['code']
+    authorization_response=authorization_response[0]
+    print(authorization_response)
+    try:
+      flow.fetch_token(code=authorization_response)
+    except:
+      st.write("リンクから認証を行ってください。")
+      sys.exit(1)
+    # flow.fetch_token(code=authorization_response)
+    credentials = flow.credentials
+    st.session_state['credentials']=credentials_to_dict(credentials)
 
 
-  flow.fetch_token(code=authorization_response)
-  credentials = flow.credentials
 
   youtube = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
 
@@ -81,3 +104,8 @@ if 'code' in st.experimental_get_query_params():
     )
   penny = channel_analytics['rows'][0]
   st.write(penny)
+  st.button("アクション")
+
+# http://localhost:8501/?state=9jlg4F2NuM0CE1vuG8JK2Ql3zc21TU&code=4/0AWtgzh7GL2gNB4bYd7ZqC4LxcSTKRFLzJ298iI8urW7dXicwsdg500srSv-PP3tIhWu4gw&scope=https://www.googleapis.com/auth/yt-analytics.readonly
+
+# http://localhost:8501/?state=9jlg4F2NuM0CE1vuG8JK2Ql3zc21TU&code=4/0AWtgzh7GL2gNB4bYd7ZqC4LxcSTKRFLzJ298iI8urW7dXicwsdg500srSv-PP3tIhWu4gw&scope=https://www.googleapis.com/auth/yt-analytics.readonly
