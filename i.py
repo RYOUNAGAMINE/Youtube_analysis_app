@@ -90,7 +90,7 @@ authorization_url, state = flow.authorization_url(
 
 
 
-
+st.title("Youtube分析ダッシュボード")
 
 st.write(get_login_str(),unsafe_allow_html=True)
 
@@ -128,10 +128,29 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
           dimensions='channel',
       )
     penny = channel_analytics['rows'][0]
+
     print(penny)
-    
-    penny = pd.Series(penny, index=['チャンネルID','視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
+    penny = penny.pop(1)
+    penny = pd.Series(penny, index=['視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
     st.write(penny)
+
+    video_analysis = execute_api_request(
+      youtube.reports().query,
+      ids='channel==MINE',
+      # ids='contentOwner==OWNER_NAME,',
+      startDate='2020-01-26',
+      endDate='2022-07-31',
+      metrics='estimatedMinutesWatched,views,likes,subscribersGained',
+      dimensions='video',
+      sort='-estimatedMinutesWatched',
+      maxResults=10
+
+    )
+    rows = video_analysis['rows']
+    video_ids = []
+    for row in rows:
+      video_id = row[0]
+      video_ids.append(video_id)
 
 
     st.button("アクション")
@@ -140,6 +159,6 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     print("エラーが発生しました")
     print(e)
     pass
-  else:
-    print("a")
-  
+else:
+  print("a")
+
