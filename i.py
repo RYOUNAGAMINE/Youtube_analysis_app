@@ -3,7 +3,7 @@ import datetime
 import asyncio
 import os
 from dateutil.relativedelta import relativedelta
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import pandas as pd
 
 import google.oauth2.credentials
@@ -128,9 +128,11 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
           dimensions='channel',
       )
     penny = channel_analytics['rows'][0]
-    df = pd.DataFrame(penny, columns = ["value"], index = ['視聴回数,視聴時間(分),いいね,バッド,コメント,シェア,チャンネル登録回数'])
-    st.write(df)
-    # st.write(penny)
+    print(penny)
+    
+    penny = pd.Series(penny, index=['チャンネルID','視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
+    st.write(penny)
+
 
     st.button("アクション")
     # st.columns(2)
@@ -138,3 +140,6 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     print("エラーが発生しました")
     print(e)
     pass
+  else:
+    print("a")
+  
