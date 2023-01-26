@@ -21,6 +21,7 @@ SCOPES_YOUTUBE= ['https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME_YOUYUBE = 'youtube'
 API_VERSION_YOUYUBE = 'v3'
 
+DEVELOPER_KEY = "secret.json"
 CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
 
 def get_login_str():
@@ -90,6 +91,7 @@ authorization_url, state = flow.authorization_url(
 
 
 
+
 st.title("Youtube分析ダッシュボード")
 
 st.write(get_login_str(),unsafe_allow_html=True)
@@ -112,7 +114,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
 
 
-    youtube = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
+    youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
 
 
     period = time_select()
@@ -120,7 +122,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     end_date = period[1]
 
     channel_analytics = execute_api_request(
-          youtube.reports().query,
+          youtube_analytics.reports().query,
           ids='channel==MINE',
           startDate=start_date,
           endDate=end_date,
@@ -135,7 +137,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     st.write(penny)
 
     video_analysis = execute_api_request(
-      youtube.reports().query,
+      youtube_analytics.reports().query,
       ids='channel==MINE',
       # ids='contentOwner==OWNER_NAME,',
       startDate='2020-01-26',
@@ -151,14 +153,20 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     for row in rows:
       video_id = row[0]
       video_ids.append(video_id)
+    
+    youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
+    search_response = youtube.videos().list(
+    
+    part="id",
+    id =video_ids[0]
+    ).execute()
 
-
+    print(search_response)
     st.button("アクション")
     # st.columns(2)
   except Exception as e:
     print("エラーが発生しました")
     print(e)
     pass
-else:
-  print("a")
+
 
