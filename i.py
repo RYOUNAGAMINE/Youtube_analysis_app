@@ -2,9 +2,11 @@ import streamlit as st
 import datetime
 import asyncio
 import os
+import json
 from dateutil.relativedelta import relativedelta
 # from dotenv import load_dotenv
 import pandas as pd
+import traceback
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -21,7 +23,9 @@ SCOPES_YOUTUBE= ['https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME_YOUYUBE = 'youtube'
 API_VERSION_YOUYUBE = 'v3'
 
-DEVELOPER_KEY = "secret.json"
+with open('secret.json') as f:
+  secret = json.load(f)
+DEVELOPER_KEY = secret['KEY']
 CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
 
 def get_login_str():
@@ -153,20 +157,43 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     for row in rows:
       video_id = row[0]
       video_ids.append(video_id)
-    
+
     youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
-    search_response = youtube.videos().list(
-    
-    part="id",
-    id =video_ids[0]
+    response = youtube.videos().list(
+
+    part="snippet",
+    id =video_ids
     ).execute()
 
-    print(search_response)
+    video_titles=[]
+    response = response['items']
+    # st.write(response)
+    for item in response:
+      video_title=item['snippet']['title']
+      video_titles.append(video_title)
+
+    # st.write(video_titles)
+    video_select = st.selectbox(label="動画を選択してください。",
+    options=video_titles)
     st.button("アクション")
+    video_data = {}
+    for i in range(len(video_titles)):
+      video_data[f'{video_ids[i]}'] = video_titles[i]
+
+    st.write(video_data)
+
+    def get_key(val):
+        for key, value in video_data.items():
+            if val == value:
+                return key
+
+    VIDEO_ID = get_key(video_select)
+    st.write(VIDEO_ID)
     # st.columns(2)
   except Exception as e:
-    print("エラーが発生しました")
-    print(e)
+    # print("エラーが発生しました")
+    # print(e)
+    traceback.print_exc()
     pass
 
 
