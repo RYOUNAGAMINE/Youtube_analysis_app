@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.express as px
 import datetime
 import asyncio
 import os
@@ -140,6 +141,45 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     penny = pd.Series(penny, index=['視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
     st.write(penny)
 
+    age_gender = execute_api_request(
+      youtube_analytics.reports().query,
+      ids='channel==MINE',
+      startDate=start_date,
+      endDate=end_date,
+      dimensions='ageGroup,gender',
+      metrics='viewerPercentage',
+      sort='gender,ageGroup'
+      )
+
+    age_gender = age_gender['rows']
+
+    for i in range(len(age_gender)):
+      if age_gender[i][1] == 'female':
+        age_gender[i][1] = '女性'
+      elif age_gender[i][1] == 'male':
+        age_gender[i][1] = '男性'
+
+    Character = ["男性","女性"]
+    Parent = ["",""]
+    Value = [0,0]
+    for i in range(len(age_gender)):
+      Character.append(age_gender[i][0])
+      Parent.append(age_gender[i][1])
+      Value.append(age_gender[i][2])
+
+    data = dict(
+    character=Character,
+    parent=Parent,
+    value=Value)
+
+    fig = px.sunburst(
+        data,
+        names='character',
+        parents='parent',
+        values='value',
+    )
+    st.write(fig)
+
     video_analysis = execute_api_request(
       youtube_analytics.reports().query,
       ids='channel==MINE',
@@ -189,6 +229,17 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
     VIDEO_ID = get_key(video_select)
     st.write(VIDEO_ID)
+    result = execute_api_request(
+    youtube_analytics.reports().query,
+    ids='channel==MINE',
+    # ids='contentOwner==OWNER_NAME,',
+    startDate=start_date,
+    endDate=end_date,
+    dimensions='elapsedVideoTimeRatio',
+    metrics='audienceWatchRatio,relativeRetentionPerformance',
+    filters=f'video=={VIDEO_ID};audienceType==ORGANIC'
+    )
+
     # st.columns(2)
   except Exception as e:
     # print("エラーが発生しました")
