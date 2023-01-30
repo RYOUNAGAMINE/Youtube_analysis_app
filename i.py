@@ -3,6 +3,7 @@ import plotly.express as px
 import datetime
 import asyncio
 import os
+import re
 import json
 from dateutil.relativedelta import relativedelta
 # from dotenv import load_dotenv
@@ -114,6 +115,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
         flow.fetch_token(code=authorization_response)
       except:
         st.write("リンクから認証を行ってください。")
+        print("リンクから認証を行ってください。1")
       credentials = flow.credentials
       st.session_state['credentials']=credentials_to_dict(credentials)
 
@@ -136,8 +138,8 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       )
     penny = channel_analytics['rows'][0]
 
-    print(penny)
-    penny = penny.pop(1)
+
+    penny.pop(0)
     penny = pd.Series(penny, index=['視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
     st.write(penny)
 
@@ -154,6 +156,8 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     age_gender = age_gender['rows']
 
     for i in range(len(age_gender)):
+      age_gender[i][0] = age_gender[i][0].replace('age', '')
+      age_gender[i][0] += '歳'
       if age_gender[i][1] == 'female':
         age_gender[i][1] = '女性'
       elif age_gender[i][1] == 'male':
@@ -184,8 +188,8 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       youtube_analytics.reports().query,
       ids='channel==MINE',
       # ids='contentOwner==OWNER_NAME,',
-      startDate='2020-01-26',
-      endDate='2022-07-31',
+      startDate=start_date,
+      endDate=datetime.date.today(),
       metrics='estimatedMinutesWatched,views,likes,subscribersGained',
       dimensions='video',
       sort='-estimatedMinutesWatched',
@@ -220,7 +224,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     for i in range(len(video_titles)):
       video_data[f'{video_ids[i]}'] = video_titles[i]
 
-    st.write(video_data)
+
 
     def get_key(val):
         for key, value in video_data.items():
@@ -228,23 +232,90 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
                 return key
 
     VIDEO_ID = get_key(video_select)
-    st.write(VIDEO_ID)
-    result = execute_api_request(
-    youtube_analytics.reports().query,
-    ids='channel==MINE',
-    # ids='contentOwner==OWNER_NAME,',
-    startDate=start_date,
-    endDate=end_date,
-    dimensions='elapsedVideoTimeRatio',
-    metrics='audienceWatchRatio,relativeRetentionPerformance',
-    filters=f'video=={VIDEO_ID};audienceType==ORGANIC'
-    )
+    video_field = st.empty()
+    url = f'https://youtu.be/{VIDEO_ID}'
+    video_field.video(url)
 
+
+    def time_minute():
+      video_data = youtube.videos().list(
+      part="contentDetails",
+      id =f'{VIDEO_ID}'
+      ).execute()
+
+      video_time=video_data['items'][0]['contentDetails']['duration']
+
+      m = r'PT(.*)M'
+      s = r'M(.*)S'
+      minute = re.findall(m, video_time)
+      second = re.findall(s, video_time)
+      minute = int(minute[0])
+      second = int(second[0])
+      minute_second = minute * 60
+      fulltime_second = minute_second + second
+      return fulltime_second
+
+    fulltime_second = time_minute()
+
+    def line_graph(fulltime):
+      result = execute_api_request(
+          youtube_analytics.reports().query,
+          ids='channel==MINE',
+          # ids='contentOwner==OWNER_NAME,',
+          startDate=start_date,
+          endDate=end_date,
+          dimensions='elapsedVideoTimeRatio',
+          metrics='audienceWatchRatio,relativeRetentionPerformance',
+          filters=f'video=={VIDEO_ID};audienceType==ORGANIC'
+      )
+
+      TimeRatio = {}
+      Time = []
+      Persentage = []
+      average_persentage = 0
+      for i in range(len(result['rows'])):
+        videotime_second = result['rows'][i][0] * fulltime
+        video_second = str(round(videotime_second % 60))
+        video_minute = str(int(videotime_second // 60))
+
+        if len(video_second) == 1:
+          video_second = "0" + video_second
+        videotime_now =video_minute + ":" + video_second
+        Time.append(videotime_now)
+        Persentage.append(result['rows'][i][1]*100)
+        average_persentage += result['rows'][i][1]
+
+      average_persentage = (average_persentage / len(Persentage))*100
+      videotime_second =  (average_persentage / 100) * fulltime
+      average_second = str(round(videotime_second % 60))
+      average_minute = str(int(videotime_second / 60))
+      average_time = average_minute + ":" + average_second
+      TimeRatio['time'] = Time
+      TimeRatio['persentage'] = Persentage
+
+      fig = px.line(TimeRatio, x = 'time',y='persentage')
+      fig.update_layout(title='視聴者維持率',
+                        width=1000,
+                        height=500)
+      fig.update_xaxes(showgrid=False,showticklabels=False)
+      return fig,average_persentage,average_time
+
+    fig = line_graph(fulltime_second)[0]
+
+    st.write("平均視聴率 + " + str(line_graph(fulltime_second)[1]))
+    st.write("平均視聴時間 : " + str(line_graph(fulltime_second)[2]))
+    st.write(fig)
     # st.columns(2)
+  except google.auth.exceptions.RefreshError:
+    st.write("リンクから認証を行ってください。")
+    print("リンクから認証を行ってください。2")
+    traceback.print_exc()
   except Exception as e:
     # print("エラーが発生しました")
     # print(e)
     traceback.print_exc()
     pass
 
+  else:
+    print ('正常に処理が完了しました')
 
