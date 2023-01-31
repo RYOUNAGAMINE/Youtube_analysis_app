@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 # from dotenv import load_dotenv
 import pandas as pd
 import traceback
+import datetime
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -244,11 +245,14 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       ).execute()
 
       video_time=video_data['items'][0]['contentDetails']['duration']
-
       m = r'PT(.*)M'
       s = r'M(.*)S'
       minute = re.findall(m, video_time)
       second = re.findall(s, video_time)
+      if not second:
+        second.append(0)
+      if not minute:
+        minute.append(0)
       minute = int(minute[0])
       second = int(second[0])
       minute_second = minute * 60
@@ -275,21 +279,20 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       average_persentage = 0
       for i in range(len(result['rows'])):
         videotime_second = result['rows'][i][0] * fulltime
-        video_second = str(round(videotime_second % 60))
-        video_minute = str(int(videotime_second // 60))
 
-        if len(video_second) == 1:
-          video_second = "0" + video_second
-        videotime_now =video_minute + ":" + video_second
+        videotime_now = str(datetime.timedelta(seconds=int(videotime_second)))
+
+        if videotime_now[:2] == '0:':
+          videotime_now = videotime_now[2:]
         Time.append(videotime_now)
         Persentage.append(result['rows'][i][1]*100)
         average_persentage += result['rows'][i][1]
 
-      average_persentage = (average_persentage / len(Persentage))*100
-      videotime_second =  (average_persentage / 100) * fulltime
-      average_second = str(round(videotime_second % 60))
-      average_minute = str(int(videotime_second / 60))
-      average_time = average_minute + ":" + average_second
+      average_persentage = int((average_persentage / len(Persentage))*100)
+      average_fullsecond =  int((average_persentage / 100) * fulltime)
+      average_time= str(datetime.timedelta(seconds=average_fullsecond))
+      if average_time[:2] == '0:':
+        average_time = average_time[2:]
       TimeRatio['time'] = Time
       TimeRatio['persentage'] = Persentage
 
@@ -297,12 +300,13 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       fig.update_layout(title='視聴者維持率',
                         width=1000,
                         height=500)
-      fig.update_xaxes(showgrid=False,showticklabels=False)
+      interval_time = fulltime //100
+      fig.update_xaxes(dtick=interval_time)#dtickは1ミリ秒単位で間隔を設定するがplotlyがTimeRatio['time']に入っている時間(間隔を設定する時間)を1秒当たり0.1ミリ秒と認識するため10等分に等しい100で割った値を間隔に設定する
       return fig,average_persentage,average_time
 
     fig = line_graph(fulltime_second)[0]
 
-    st.write("平均視聴率 + " + str(line_graph(fulltime_second)[1]))
+    st.write("平均視聴率 : " + str(line_graph(fulltime_second)[1]) +"%")
     st.write("平均視聴時間 : " + str(line_graph(fulltime_second)[2]))
     st.write(fig)
     # st.columns(2)
