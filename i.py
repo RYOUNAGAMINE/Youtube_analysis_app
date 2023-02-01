@@ -185,6 +185,68 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     )
     st.write(fig)
 
+    def channel_reports():
+      Channel_report_response = execute_api_request(
+      youtube_analytics.reports().query,
+      ids='channel==MINE',
+      # ids='contentOwner==OWNER_NAME,',
+      startDate=start_date,
+      endDate=end_date,
+      dimensions='day',
+      metrics='views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained' ,#視聴回数,視聴分数,平均視聴時間(秒),動画の平均維持率,チャンネル登録数
+      sort='day'
+      )
+      Channel_report_response = Channel_report_response['rows']
+      Channel_report = {}
+      day = []
+      view = []
+      watch_hour = []
+      subscriber = []
+      total_day = 0
+      for i in range(len(Channel_report_response)):
+        hour = Channel_report_response[i][2] / 60
+        total_day += 1
+        day.append(Channel_report_response[i][0])
+        view.append(Channel_report_response[i][1])
+        watch_hour.append(hour)
+        subscriber.append(Channel_report_response[i][5])
+
+      Channel_report['day'] = day
+      Channel_report['view'] = view
+      Channel_report['watch_hour'] = watch_hour
+      Channel_report['subscriber'] = subscriber
+
+      total_microsecond = 1000*60*60*24*total_day
+      interval_day = total_microsecond / 5
+
+      fig_view = px.line(Channel_report, x = 'day',y='view')
+      fig_watch_hour = px.line(Channel_report, x = 'day',y='watch_hour')
+      fig_subscriber = px.line(Channel_report, x = 'day',y='subscriber')
+
+      fig_view.update_layout(title='視聴回数',
+                        width=1000,
+                        height=500)
+      fig_view.update_xaxes(dtick=interval_day)
+
+      fig_watch_hour.update_layout(title='視聴時間(時間)',
+                        width=1000,
+                        height=500)
+      fig_watch_hour.update_xaxes(dtick=interval_day)
+
+      fig_subscriber.update_layout(title='チャンネル登録者数',
+                        width=1000,
+                        height=500)
+      fig_subscriber.update_xaxes(dtick=interval_day)
+
+      return fig_view,fig_watch_hour,fig_subscriber
+    channel_view = channel_reports()[0]
+    channel_watch_hour = channel_reports()[1]
+    channel_subscriber = channel_reports()[2]
+
+    st.write(channel_view)
+    st.write(channel_watch_hour)
+    st.write(channel_subscriber)
+
     video_analysis = execute_api_request(
       youtube_analytics.reports().query,
       ids='channel==MINE',
