@@ -84,7 +84,7 @@ def time_select():
       start_date + datetime.timedelta(days=1),
       datetime.date.today()
     )
-  return start_date, end_date
+  return start_date, end_date,period
 
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES_ANALYTICS)
 flow.redirect_uri = 'http://localhost:8501'
@@ -125,10 +125,10 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
 
 
-    period = time_select()
-    start_date = period[0]
-    end_date = period[1]
-
+    periods = time_select()
+    start_date = periods[0]
+    end_date = periods[1]
+    period = periods[2]
     channel_analytics = execute_api_request(
           youtube_analytics.reports().query,
           ids='channel==MINE',
@@ -226,17 +226,17 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
       fig_view.update_layout(title='視聴回数',
                         width=1000,
                         height=500)
-      fig_view.update_xaxes(dtick=interval_day)
+      fig_view.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
       fig_watch_hour.update_layout(title='視聴時間(時間)',
                         width=1000,
                         height=500)
-      fig_watch_hour.update_xaxes(dtick=interval_day)
+      fig_watch_hour.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
       fig_subscriber.update_layout(title='チャンネル登録者数',
                         width=1000,
                         height=500)
-      fig_subscriber.update_xaxes(dtick=interval_day)
+      fig_subscriber.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
       return fig_view,fig_watch_hour,fig_subscriber
     channel_view = channel_reports()[0]
@@ -298,6 +298,101 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     video_field = st.empty()
     url = f'https://youtu.be/{VIDEO_ID}'
     video_field.video(url)
+
+    channel_analytics = execute_api_request(
+          youtube_analytics.reports().query,
+          ids='channel==MINE',
+          startDate=start_date,
+          endDate=end_date,
+          metrics='views,estimatedMinutesWatched,likes,dislikes,comments,shares,subscribersGained',
+          dimensions='video',
+          filters=f'video=={VIDEO_ID}'
+      )
+    penny = channel_analytics['rows'][0]
+    penny.pop(0)
+
+    st.write(penny)
+
+    video_views = penny[0]
+    video_hourWatched = int(penny[1] / 60)
+    video_likes = penny[2]
+    video_dislikes = penny[3]
+    video_comments = penny[4]
+    video_shares = penny[5]
+    video_subscriber = penny[6]
+    if period == 'カスタム':
+      st.markdown('## 選択した期間中')
+    else:
+      st.markdown(f'## {period}の期間中')
+
+    st.markdown(f'### 視聴回数  :  {video_views}回')
+    st.markdown(f'### 視聴時間  :  {video_hourWatched}時間')
+    st.markdown(f'### 高評価    : {video_likes}個')
+    st.markdown(f'### 低評価    : {video_dislikes}個')
+    st.markdown(f'### コメント  : {video_comments}個')
+    st.markdown(f'### 共有      : {video_shares}回')
+    st.markdown(f'### 登録者数  : {video_subscriber}人')
+    def video_reports():
+
+      video_report_response = execute_api_request(
+          youtube_analytics.reports().query,
+          ids='channel==MINE',
+          startDate=start_date,
+          endDate=end_date,
+          dimensions='day',
+          metrics='views,estimatedMinutesWatched,subscribersGained',
+          filters=f'video=={VIDEO_ID}'
+      )
+
+      video_report_response = video_report_response['rows']
+      Video_report = {}
+      day = []
+      view = []
+      watch_hour = []
+      subscriber = []
+      total_day = 0
+
+      for i in range(len(video_report_response)):
+        hour = video_report_response[i][2] / 60
+        total_day += 1
+        day.append(video_report_response[i][0])
+        view.append(video_report_response[i][1])
+        watch_hour.append(hour)
+        subscriber.append(video_report_response[i][3])
+
+      Video_report['day'] = day
+      Video_report['view'] = view
+      Video_report['watch_hour'] = watch_hour
+      Video_report['subscriber'] = subscriber
+      total_microsecond = 1000*60*60*24*total_day
+      interval_day = total_microsecond / 5
+      fig_view = px.line(Video_report, x = 'day',y='view')
+      fig_watch_hour = px.line(Video_report, x = 'day',y='watch_hour')
+      fig_subscriber = px.line(Video_report, x = 'day',y='subscriber')
+      fig_view.update_layout(title='視聴回数',
+                        width=1000,
+                        height=500)
+      fig_view.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
+
+      fig_watch_hour.update_layout(title='視聴時間(時間)',
+                        width=1000,
+                        height=500)
+      fig_watch_hour.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
+
+      fig_subscriber.update_layout(title='チャンネル登録者数',
+                        width=1000,
+                        height=500)
+      fig_subscriber.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
+
+      return fig_view,fig_watch_hour,fig_subscriber
+
+    video_view = video_reports()[0]
+    video_watch_hour = video_reports()[1]
+    video_subscriber = video_reports()[2]
+
+    st.plotly_chart(video_view, use_container_width=True)
+    st.plotly_chart(video_watch_hour, use_container_width=True)
+    st.plotly_chart(video_subscriber, use_container_width=True)
 
 
     def time_minute():
@@ -370,7 +465,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
     st.write("平均視聴率 : " + str(line_graph(fulltime_second)[1]) +"%")
     st.write("平均視聴時間 : " + str(line_graph(fulltime_second)[2]))
-    st.write(fig)
+    st.plotly_chart(fig, use_container_width=True)
     # st.columns(2)
   except google.auth.exceptions.RefreshError:
     st.write("リンクから認証を行ってください。")
