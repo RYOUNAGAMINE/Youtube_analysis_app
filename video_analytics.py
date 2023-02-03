@@ -2,6 +2,53 @@ import app as ap
 import plotly.express as px
 import re
 import datetime
+import streamlit as st
+
+def ids_titles_function(youtube_analytics,start_date,youtube):
+    video_analysis = ap.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=datetime.date.today(),
+        metrics='estimatedMinutesWatched,views,likes,subscribersGained',
+        dimensions='video',
+        sort='-estimatedMinutesWatched',
+        maxResults=50
+    )
+
+
+    rows = video_analysis['rows']
+    video_ids = []
+    for row in rows:
+        video_id = row[0]
+        video_ids.append(video_id)
+
+
+    response = youtube.videos().list(
+
+    part="snippet",
+    id =video_ids
+    ).execute()
+
+    video_titles=[]
+    response = response['items']
+    for item in response:
+        video_title=item['snippet']['title']
+        video_titles.append(video_title)
+
+
+
+    ids_titles = {}
+    for i in range(len(video_titles)):
+        ids_titles[f'{video_ids[i]}'] = video_titles[i]
+
+    return ids_titles,video_titles
+
+def get_key(val,id_title):
+    for key, value in id_title.items():
+        if val == value:
+            return key
+
 def channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
@@ -133,3 +180,62 @@ def viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime):
     interval_time = fulltime //100
     fig.update_xaxes(dtick=interval_time)#dtickは1ミリ秒単位で間隔を設定するがplotlyがTimeRatio['time']に入っている時間(間隔を設定する時間)を1秒当たり0.1ミリ秒と認識するため10等分に等しい100で割った値を間隔に設定する
     return fig,average_persentage,average_time
+
+def app_video(youtube_analytics,youtube,start_date,end_date,period):
+    ids_titles_list = ids_titles_function(youtube_analytics,start_date,youtube)
+    video_ids_titles = ids_titles_list[0]
+    video_titles = ids_titles_list[1]
+    video_select_title = st.selectbox(label="動画を選択してください。",
+    options=video_titles)
+
+
+
+    VIDEO_ID = get_key(video_select_title,video_ids_titles)
+    video_field = st.empty()
+    url = f'https://youtu.be/{VIDEO_ID}'
+    video_field.video(url)
+
+
+
+    video_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID)
+
+    video_views = video_basis_data[0]
+    video_hourWatched = int(video_basis_data[1] / 60)
+    video_likes = video_basis_data[2]
+    video_dislikes = video_basis_data[3]
+    video_comments = video_basis_data[4]
+    video_shares = video_basis_data[5]
+    video_subscriber = video_basis_data[6]
+
+    if period == 'カスタム':
+        st.markdown('## 選択した期間中')
+    else:
+        st.markdown(f'## {period}の期間中')
+
+    st.markdown(f'### 視聴回数  :  {video_views}回')
+    st.markdown(f'### 視聴時間  :  {video_hourWatched}時間')
+    st.markdown(f'### 高評価    : {video_likes}個')
+    st.markdown(f'### 低評価    : {video_dislikes}個')
+    st.markdown(f'### コメント  : {video_comments}個')
+    st.markdown(f'### 共有      : {video_shares}回')
+    st.markdown(f'### 登録者数  : {video_subscriber}人')
+
+    video_graphs  = video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID)
+    video_view = video_graphs[0]
+    video_watch_hour = video_graphs[1]
+    video_subscriber = video_graphs[2]
+
+    st.plotly_chart(video_view, use_container_width=True)
+    st.plotly_chart(video_watch_hour, use_container_width=True)
+    st.plotly_chart(video_subscriber, use_container_width=True)
+
+
+
+
+    fulltime_second = time_minute(youtube,VIDEO_ID)
+    viewing_data = viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime_second)
+
+    viewing_graph = viewing_data[0]
+    st.write("平均視聴率 : " + str(viewing_data[1]) +"%")
+    st.write("平均視聴時間 : " + str(viewing_data[2]))
+    st.plotly_chart(viewing_graph, use_container_width=True)

@@ -1,6 +1,7 @@
 import app as ap
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 def channel_basis_reports(youtube_analytics,start_date,end_date):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
@@ -29,7 +30,7 @@ def age_gender_graph(youtube_analytics,start_date,end_date):
     )
 
     age_gender = age_gender['rows']
-    
+
     Character = ["男性","女性"]
     Parent = ["",""]
     Value = [0,0]
@@ -112,3 +113,22 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     fig_subscriber.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     return fig_view,fig_watch_hour,fig_subscriber
+
+def app_channel(youtube_analytics,start_date,end_date):
+
+    channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
+    st.write(channel_basis_data)
+
+
+    channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
+    st.write(channel_age_gender_graph)
+
+
+    channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
+    channel_view = channel_basis_graphs[0]
+    channel_watch_hour = channel_basis_graphs[1]
+    channel_subscriber = channel_basis_graphs[2]
+
+    st.write(channel_view)
+    st.write(channel_watch_hour)
+    st.write(channel_subscriber)
