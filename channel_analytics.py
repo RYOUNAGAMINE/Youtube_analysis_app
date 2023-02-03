@@ -1,5 +1,7 @@
 import app as ap
-def channel_basis_reports():
+import pandas as pd
+import plotly.express as px
+def channel_basis_reports(youtube_analytics,start_date,end_date):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -15,7 +17,7 @@ def channel_basis_reports():
     channel_basis_data = pd.Series(channel_basis_data, index=['視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
     return channel_basis_data
 
-def age_gender_graph():
+def age_gender_graph(youtube_analytics,start_date,end_date):
     age_gender = ap.execute_api_request(
     youtube_analytics.reports().query,
     ids='channel==MINE',
@@ -57,11 +59,10 @@ def age_gender_graph():
     )
     return fig
 
-def channel_basis_graph():
+def channel_basis_graph(youtube_analytics,start_date,end_date):
     Channel_report_response = ap.execute_api_request(
     youtube_analytics.reports().query,
     ids='channel==MINE',
-    # ids='contentOwner==OWNER_NAME,',
     startDate=start_date,
     endDate=end_date,
     dimensions='day',

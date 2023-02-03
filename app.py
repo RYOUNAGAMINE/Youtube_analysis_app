@@ -6,7 +6,7 @@ import os
 import re
 import json
 from dateutil.relativedelta import relativedelta
-# from dotenv import load_dotenv
+
 import pandas as pd
 import traceback
 import datetime
@@ -106,7 +106,7 @@ def ids_titles_function():
     video_id = row[0]
     video_ids.append(video_id)
 
-  youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
+  
   response = youtube.videos().list(
 
   part="snippet",
@@ -125,7 +125,7 @@ def ids_titles_function():
   for i in range(len(video_titles)):
     ids_titles[f'{video_ids[i]}'] = video_titles[i]
 
-  return ids_titles
+  return ids_titles,video_titles
 
 def get_key(val,id_title):
     for key, value in id_title.items():
@@ -169,7 +169,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
 
     youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
-
+    youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
 
     periods = time_select()
     start_date = periods[0]
@@ -177,15 +177,15 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     period = periods[2]
     
 
-    channel_basis_data = ca.channel_basis_reports()
+    channel_basis_data = ca.channel_basis_reports(youtube_analytics,start_date,end_date)
     st.write(channel_basis_data)
 
 
-    channel_age_gender_graph = ca.age_gender_graph()
+    channel_age_gender_graph = ca.age_gender_graph(youtube_analytics,start_date,end_date)
     st.write(channel_age_gender_graph)
 
 
-    channel_basis_graph=ca.channel_basis_graph()
+    channel_basis_graph=ca.channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graph[0]
     channel_watch_hour = channel_basis_graph[1]
     channel_subscriber = channel_basis_graph[2]
@@ -197,21 +197,22 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
 
 
-    ids_titles = ids_titles_function()
-    video_select = st.selectbox(label="動画を選択してください。",
+    video_ids_titles = ids_titles_function()[0]
+    video_titles = ids_titles_function()[1]
+    video_select_title = st.selectbox(label="動画を選択してください。",
     options=video_titles)
     st.button("リロード")
     
 
 
-    VIDEO_ID = get_key(video_select,ids_titles)
+    VIDEO_ID = get_key(video_select_title,video_ids_titles)
     video_field = st.empty()
     url = f'https://youtu.be/{VIDEO_ID}'
     video_field.video(url)
 
 
 
-    video_basis_data = va.channel_basis_reports()
+    video_basis_data = va.channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID)
     
     video_views = video_basis_data[0]
     video_hourWatched = int(video_basis_data[1] / 60)
@@ -234,10 +235,10 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
     st.markdown(f'### 共有      : {video_shares}回')
     st.markdown(f'### 登録者数  : {video_subscriber}人')
     
-    video_graphs  = va.video_graph_function()
+    video_graphs  = va.video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID)
     video_view = video_graphs[0]
-    video_watch_hour = video_graphs()[1]
-    video_subscriber = video_graphs()[2]
+    video_watch_hour = video_graphs[1]
+    video_subscriber = video_graphs[2]
 
     st.plotly_chart(video_view, use_container_width=True)
     st.plotly_chart(video_watch_hour, use_container_width=True)
@@ -246,8 +247,8 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
 
 
-    fulltime_second = va.time_minute()
-    viewing_data = va.viewing_function(fulltime_second)
+    fulltime_second = va.time_minute(youtube,VIDEO_ID)
+    viewing_data = va.viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime_second)
 
     viewing_graph = viewing_data[0]
     st.write("平均視聴率 : " + str(viewing_data[1]) +"%")
@@ -256,8 +257,8 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
   except google.auth.exceptions.RefreshError:
     st.write("リンクから認証を行ってください。")
-    print("リンクから認証を行ってください。2")
     traceback.print_exc()
+    print("リンクから認証を行ってください。2")
     
   except Exception as e:
     traceback.print_exc()

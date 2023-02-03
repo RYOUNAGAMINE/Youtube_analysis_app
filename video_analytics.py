@@ -1,6 +1,8 @@
 import app as ap
-
-def channel_basis_reports():
+import plotly.express as px
+import re
+import datetime
+def channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -14,7 +16,7 @@ def channel_basis_reports():
     video_basis_data.pop(0)
     return video_basis_data
 
-def video_graph_function():
+def video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID):
     video_report_graph = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -67,7 +69,7 @@ def video_graph_function():
 
     return fig_view,fig_watch_hour,fig_subscriber
 
-def time_minute():
+def time_minute(youtube,VIDEO_ID):
     video_data = youtube.videos().list(
     part="contentDetails",
     id =f'{VIDEO_ID}'
@@ -90,7 +92,7 @@ def time_minute():
 
 
 
-def viewing_function(fulltime):
+def viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime):
     result = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
