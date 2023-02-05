@@ -2,6 +2,7 @@ import app as ap
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+
 def channel_basis_reports(youtube_analytics,start_date,end_date):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
@@ -78,12 +79,12 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     subscriber = []
     total_day = 0
     for i in range(len(Channel_report_response)):
-        hour = Channel_report_response[i][2] / 60
-        total_day += 1
-        day.append(Channel_report_response[i][0])
-        view.append(Channel_report_response[i][1])
-        watch_hour.append(hour)
-        subscriber.append(Channel_report_response[i][5])
+      hour = Channel_report_response[i][2] / 60
+      total_day += 1
+      day.append(Channel_report_response[i][0])
+      view.append(Channel_report_response[i][1])
+      watch_hour.append(hour)
+      subscriber.append(Channel_report_response[i][5])
 
     Channel_report['day'] = day
     Channel_report['view'] = view
@@ -98,18 +99,18 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     fig_subscriber = px.line(Channel_report, x = 'day',y='subscriber')
 
     fig_view.update_layout(title='視聴回数',
-                    width=1000,
-                    height=500)
+    width=1000,
+    height=500)
     fig_view.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     fig_watch_hour.update_layout(title='視聴時間(時間)',
-                    width=1000,
-                    height=500)
+    width=1000,
+    height=500)
     fig_watch_hour.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     fig_subscriber.update_layout(title='チャンネル登録者数',
-                    width=1000,
-                    height=500)
+    width=1000,
+    height=500)
     fig_subscriber.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     return fig_view,fig_watch_hour,fig_subscriber
@@ -119,16 +120,18 @@ def app_channel(youtube_analytics,start_date,end_date):
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
     st.write(channel_basis_data)
 
-
-    channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
-    st.write(channel_age_gender_graph)
-
-
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graphs[0]
     channel_watch_hour = channel_basis_graphs[1]
     channel_subscriber = channel_basis_graphs[2]
 
-    st.write(channel_view)
-    st.write(channel_watch_hour)
-    st.write(channel_subscriber)
+    col1, col2, col3= st.columns(3)
+    with col1:
+      st.plotly_chart(channel_view, use_container_width=True)
+    with col2:
+      st.plotly_chart(channel_watch_hour, use_container_width=True)
+    with col3:
+      st.plotly_chart(channel_subscriber, use_container_width=True)
+
+    channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
+    st.plotly_chart(channel_age_gender_graph, use_container_width=True)

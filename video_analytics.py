@@ -4,16 +4,16 @@ import re
 import datetime
 import streamlit as st
 
-def ids_titles_function(youtube_analytics,start_date,youtube):
+def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
     video_analysis = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
-        startDate=start_date,
+        startDate=datetime.date(2020,4,26),
         endDate=datetime.date.today(),
         metrics='estimatedMinutesWatched,views,likes,subscribersGained',
         dimensions='video',
         sort='-estimatedMinutesWatched',
-        maxResults=50
+        maxResults=max_results
     )
 
 
@@ -49,7 +49,7 @@ def get_key(val,id_title):
         if val == value:
             return key
 
-def channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID):
+def channel_basis_reports(youtube_analytics,start_date,end_date,video_id):
     channel_analytics = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -57,13 +57,13 @@ def channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID):
         endDate=end_date,
         metrics='views,estimatedMinutesWatched,likes,dislikes,comments,shares,subscribersGained',
         dimensions='video',
-        filters=f'video=={VIDEO_ID}'
+        filters=f'video=={video_id}'
     )
     video_basis_data = channel_analytics['rows'][0]
     video_basis_data.pop(0)
     return video_basis_data
 
-def video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID):
+def video_graph_function(youtube_analytics,start_date,end_date,video_id):
     video_report_graph = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -71,7 +71,7 @@ def video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID):
         endDate=end_date,
         dimensions='day',
         metrics='views,estimatedMinutesWatched,subscribersGained',
-        filters=f'video=={VIDEO_ID}'
+        filters=f'video=={video_id}'
     )
 
     video_report_graph = video_report_graph['rows']
@@ -116,10 +116,10 @@ def video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID):
 
     return fig_view,fig_watch_hour,fig_subscriber
 
-def time_minute(youtube,VIDEO_ID):
+def time_minute(youtube,video_id):
     video_data = youtube.videos().list(
     part="contentDetails",
-    id =f'{VIDEO_ID}'
+    id =f'{video_id}'
     ).execute()
 
     video_time=video_data['items'][0]['contentDetails']['duration']
@@ -139,7 +139,7 @@ def time_minute(youtube,VIDEO_ID):
 
 
 
-def viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime):
+def viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime):
     result = ap.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -147,7 +147,7 @@ def viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime):
         endDate=end_date,
         dimensions='elapsedVideoTimeRatio',
         metrics='audienceWatchRatio,relativeRetentionPerformance',
-        filters=f'video=={VIDEO_ID};audienceType==ORGANIC'
+        filters=f'video=={video_id};audienceType==ORGANIC'
     )
 
     timeRatio = {}
@@ -181,23 +181,69 @@ def viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime):
     fig.update_xaxes(dtick=interval_time)#dtickは1ミリ秒単位で間隔を設定するがplotlyがTimeRatio['time']に入っている時間(間隔を設定する時間)を1秒当たり0.1ミリ秒と認識するため10等分に等しい100で割った値を間隔に設定する
     return fig,average_persentage,average_time
 
+def age_gender_graph_video(youtube_analytics,start_date,end_date,video_id):
+    age_gender = ap.execute_api_request(
+    youtube_analytics.reports().query,
+    ids='channel==MINE',
+    startDate=start_date,
+    endDate=end_date,
+    dimensions='ageGroup,gender',
+    metrics='viewerPercentage',
+    sort='gender,ageGroup',
+    filters=f'video=={video_id}'
+    )
+
+    age_gender = age_gender['rows']
+
+    Character = ["男性","女性"]
+    Parent = ["",""]
+    Value = [0,0]
+    for i in range(len(age_gender)):
+        age_gender[i][0] = age_gender[i][0].replace('age', '')
+        age_gender[i][0] += '歳'
+        Character.append(age_gender[i][0])
+        if age_gender[i][1] == 'female':
+            age_gender[i][1] = '女性'
+        elif age_gender[i][1] == 'male':
+            age_gender[i][1] = '男性'
+        Parent.append(age_gender[i][1])
+        Value.append(age_gender[i][2])
+
+
+
+    data = dict(
+    character=Character,
+    parent=Parent,
+    value=Value)
+
+    fig = px.sunburst(
+        data,
+        names='character',
+        parents='parent',
+        values='value',
+    )
+    return fig
+
+# def title_session():
+
+
 def app_video(youtube_analytics,youtube,start_date,end_date,period):
     ids_titles_list = ids_titles_function(youtube_analytics,start_date,youtube)
     video_ids_titles = ids_titles_list[0]
     video_titles = ids_titles_list[1]
+
     video_select_title = st.selectbox(label="動画を選択してください。",
-    options=video_titles)
+        options=video_titles)
 
 
-
-    VIDEO_ID = get_key(video_select_title,video_ids_titles)
+    video_id = get_key(video_select_title,video_ids_titles)
     video_field = st.empty()
-    url = f'https://youtu.be/{VIDEO_ID}'
+    url = f'https://youtu.be/{video_id}'
     video_field.video(url)
 
 
 
-    video_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date,VIDEO_ID)
+    video_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date,video_id)
 
     video_views = video_basis_data[0]
     video_hourWatched = int(video_basis_data[1] / 60)
@@ -212,30 +258,37 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
     else:
         st.markdown(f'## {period}の期間中')
 
-    st.markdown(f'### 視聴回数  :  {video_views}回')
-    st.markdown(f'### 視聴時間  :  {video_hourWatched}時間')
-    st.markdown(f'### 高評価    : {video_likes}個')
-    st.markdown(f'### 低評価    : {video_dislikes}個')
-    st.markdown(f'### コメント  : {video_comments}個')
-    st.markdown(f'### 共有      : {video_shares}回')
-    st.markdown(f'### 登録者数  : {video_subscriber}人')
+    st.markdown(f'###### 視聴回数  :  {video_views}回')
+    st.markdown(f'###### 視聴時間  :  {video_hourWatched}時間')
+    st.markdown(f'###### 高評価    : {video_likes}個')
+    st.markdown(f'###### 低評価    : {video_dislikes}個')
+    st.markdown(f'###### コメント  : {video_comments}個')
+    st.markdown(f'###### 共有      : {video_shares}回')
+    st.markdown(f'###### 登録者数  : {video_subscriber}人')
 
-    video_graphs  = video_graph_function(youtube_analytics,start_date,end_date,VIDEO_ID)
+    video_graphs  = video_graph_function(youtube_analytics,start_date,end_date,video_id)
     video_view = video_graphs[0]
     video_watch_hour = video_graphs[1]
     video_subscriber = video_graphs[2]
+    col1, col2, col3= st.columns(3)
+    with col1:
+      st.plotly_chart(video_view, use_container_width=True)
+    with col2:
+      st.plotly_chart(video_watch_hour, use_container_width=True)
+    with col3:
+      st.plotly_chart(video_subscriber, use_container_width=True)
 
-    st.plotly_chart(video_view, use_container_width=True)
-    st.plotly_chart(video_watch_hour, use_container_width=True)
-    st.plotly_chart(video_subscriber, use_container_width=True)
 
 
 
 
-    fulltime_second = time_minute(youtube,VIDEO_ID)
-    viewing_data = viewing_function(youtube_analytics,start_date,end_date,VIDEO_ID,fulltime_second)
+    fulltime_second = time_minute(youtube,video_id)
+    viewing_data = viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime_second)
 
     viewing_graph = viewing_data[0]
     st.write("平均視聴率 : " + str(viewing_data[1]) +"%")
     st.write("平均視聴時間 : " + str(viewing_data[2]))
     st.plotly_chart(viewing_graph, use_container_width=True)
+
+    video_age_gender_graph= age_gender_graph_video(youtube_analytics,start_date,end_date,video_id)
+    st.write(video_age_gender_graph)
