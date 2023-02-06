@@ -272,11 +272,11 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
     video_subscriber = video_graphs[2]
     col1, col2, col3= st.columns(3)
     with col1:
-      st.plotly_chart(video_view, use_container_width=True)
+        st.plotly_chart(video_view, use_container_width=True)
     with col2:
-      st.plotly_chart(video_watch_hour, use_container_width=True)
+        st.plotly_chart(video_watch_hour, use_container_width=True)
     with col3:
-      st.plotly_chart(video_subscriber, use_container_width=True)
+        st.plotly_chart(video_subscriber, use_container_width=True)
 
 
 

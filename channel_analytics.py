@@ -79,12 +79,12 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     subscriber = []
     total_day = 0
     for i in range(len(Channel_report_response)):
-      hour = Channel_report_response[i][2] / 60
-      total_day += 1
-      day.append(Channel_report_response[i][0])
-      view.append(Channel_report_response[i][1])
-      watch_hour.append(hour)
-      subscriber.append(Channel_report_response[i][5])
+        hour = Channel_report_response[i][2] / 60
+        total_day += 1
+        day.append(Channel_report_response[i][0])
+        view.append(Channel_report_response[i][1])
+        watch_hour.append(hour)
+        subscriber.append(Channel_report_response[i][5])
 
     Channel_report['day'] = day
     Channel_report['view'] = view
@@ -118,7 +118,7 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
 def app_channel(youtube_analytics,start_date,end_date):
 
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
-    st.write(channel_basis_data)
+    st.dataframe(channel_basis_data)
 
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graphs[0]
@@ -127,11 +127,11 @@ def app_channel(youtube_analytics,start_date,end_date):
 
     col1, col2, col3= st.columns(3)
     with col1:
-      st.plotly_chart(channel_view, use_container_width=True)
+        st.plotly_chart(channel_view, use_container_width=True)
     with col2:
-      st.plotly_chart(channel_watch_hour, use_container_width=True)
+        st.plotly_chart(channel_watch_hour, use_container_width=True)
     with col3:
-      st.plotly_chart(channel_subscriber, use_container_width=True)
+        st.plotly_chart(channel_subscriber, use_container_width=True)
 
     channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
     st.plotly_chart(channel_age_gender_graph, use_container_width=True)
