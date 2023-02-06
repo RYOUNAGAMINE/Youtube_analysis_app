@@ -150,7 +150,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
             end_date = periods[1]
 
         if page == ca:
-            page.app_channel(youtube_analytics,start_date,end_date)
+            page.app_channel(youtube_analytics,start_date,end_date,period)
 
         if page == va:
             page.app_video(youtube_analytics,youtube,start_date,end_date,period)

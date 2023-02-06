@@ -239,14 +239,15 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
     video_id = get_key(video_select_title,video_ids_titles)
     video_field = st.empty()
     url = f'https://youtu.be/{video_id}'
-    video_field.video(url)
+    if st.button('ビデオを表示する'):
+        video_field.video(url)
 
 
 
     video_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date,video_id)
 
     video_views = video_basis_data[0]
-    video_hourWatched = int(video_basis_data[1] / 60)
+    video_hourWatched = round(video_basis_data[1] / 60,1)
     video_likes = video_basis_data[2]
     video_dislikes = video_basis_data[3]
     video_comments = video_basis_data[4]

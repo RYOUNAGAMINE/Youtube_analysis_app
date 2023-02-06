@@ -16,7 +16,7 @@ def channel_basis_reports(youtube_analytics,start_date,end_date):
 
 
     channel_basis_data.pop(0)
-    channel_basis_data = pd.Series(channel_basis_data, index=['視聴回数','視聴時間(分)','いいね','バッド','コメント','シェア','チャンネル登録回数'])
+    channel_basis_data = pd.Series(channel_basis_data, index=['視聴回数','視聴時間(時間)','高評価','低評価','コメント','シェア','チャンネル登録回数'])
     return channel_basis_data
 
 def age_gender_graph(youtube_analytics,start_date,end_date):
@@ -115,10 +115,31 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
 
     return fig_view,fig_watch_hour,fig_subscriber
 
-def app_channel(youtube_analytics,start_date,end_date):
+def app_channel(youtube_analytics,start_date,end_date,period):
 
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
-    st.dataframe(channel_basis_data)
+
+    if period == 'カスタム':
+        st.markdown('## 選択した期間中')
+    else:
+        st.markdown(f'## {period}の期間中')
+
+    video_views = channel_basis_data[0]
+    video_hourWatched = round(channel_basis_data[1] / 60,1)
+    video_likes = channel_basis_data[2]
+    video_dislikes = channel_basis_data[3]
+    video_comments = channel_basis_data[4]
+    video_shares = channel_basis_data[5]
+    video_subscriber = channel_basis_data[6]
+
+    st.markdown(f'###### 視聴回数  :  {video_views}回')
+    st.markdown(f'###### 視聴時間  :  {video_hourWatched}時間')
+    st.markdown(f'###### 高評価    : {video_likes}個')
+    st.markdown(f'###### 低評価    : {video_dislikes}個')
+    st.markdown(f'###### コメント  : {video_comments}個')
+    st.markdown(f'###### 共有      : {video_shares}回')
+    st.markdown(f'###### 登録者数  : {video_subscriber}人')
+    # st.dataframe(channel_basis_data)
 
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graphs[0]

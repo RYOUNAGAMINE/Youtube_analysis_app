@@ -74,7 +74,7 @@ def get_results(df_video,youtube,limiter):
         else:
             video_info['コメント数'] = ""
         videos_info.append(video_info)
-    
+
     df_videos_info = pd.DataFrame(videos_info)
     if len(videos_info) > 0:
         serch_video_ids = df_videos_info['video_id'].tolist()
@@ -122,22 +122,26 @@ def app_search(youtube):
     results = get_results(df_video,youtube, limiter=limiter)[0]
     serch_video_titles = get_results(df_video,youtube, limiter=limiter)[1]
     serch_ids_titles = get_results(df_video,youtube, limiter=limiter)[2]
-    st.write("### 分析結果")
-    st.write("### 動画再生")
+    st.write("### 検索結果")
     if len(serch_video_titles) > 0:
         st.dataframe(results)
         selectbox_video_titles = []
         for i in range(len(serch_video_titles)):
-            selectbox_video_title = f'{i}:{serch_video_titles[i]}' 
+            selectbox_video_title = f'{i}:{serch_video_titles[i]}'
             selectbox_video_titles.append(selectbox_video_title)
 
-        select_video_title = st.selectbox(label="動画を選択してください。",
-        options=selectbox_video_titles)
-        
+        if  'video_titles' in st.session_state:
+            select_video_title = st.selectbox(label="動画を選択してください。",
+            options=st.session_state['video_titles'])
+        else:
+            select_video_title = st.selectbox(label="動画を選択してください。",
+            options=selectbox_video_titles)
+            st.session_state['video_titles'] = selectbox_video_titles
+
         target = ':'
         idx = select_video_title.find(target)
         video_select_title = select_video_title[idx+1:]
-        
+
         video_id = get_key(video_select_title,serch_ids_titles)
         video_field = st.empty()
         url = f'https://youtu.be/{video_id}'
@@ -145,11 +149,9 @@ def app_search(youtube):
 
         video_field.write('こちらに動画が表示されます')
 
-        if st.button('ビデオ表示'):
-            try:
+        if st.button('ビデオを表示する'):
                 video_field.video(url)
-            except:
-                st.write("エラーが発生しました。")
+
     elif results == "":
         st.write("登録者数上限以下の動画が見つかりませんでした。登録者数の上限を変更してください。")
 
