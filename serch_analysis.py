@@ -128,6 +128,8 @@ def app_search(youtube):
             selectbox_video_title = f'{i}:{serch_video_titles[i]}'
             selectbox_video_titles.append(selectbox_video_title)
 
+        st.session_state['video_titles'] = selectbox_video_titles
+
         if  'video_titles' in st.session_state:
             select_video_title = st.selectbox(label="動画を選択してください。",
             options=st.session_state['video_titles'])

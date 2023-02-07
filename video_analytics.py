@@ -97,18 +97,18 @@ def video_graph_function(youtube_analytics,start_date,end_date,video_id):
     fig_watch_hour = px.line(Video_report, x = 'day',y='watch_hour')
     fig_subscriber = px.line(Video_report, x = 'day',y='subscriber')
     fig_view.update_layout(title='視聴回数',
-                    width=1000,
-                    height=500)
+        width=1000,
+        height=500)
     fig_view.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     fig_watch_hour.update_layout(title='視聴時間(時間)',
-                    width=1000,
-                    height=500)
+        width=1000,
+        height=500)
     fig_watch_hour.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     fig_subscriber.update_layout(title='チャンネル登録者数',
-                    width=1000,
-                    height=500)
+        width=1000,
+        height=500)
     fig_subscriber.update_xaxes(tickformat='%Y/%m/%d',dtick=interval_day)
 
     return fig_view,fig_watch_hour,fig_subscriber
@@ -151,6 +151,7 @@ def viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime):
     time = []
     persentage = []
     average_persentage = 0
+
     for i in range(len(result['rows'])):
         videotime_second = result['rows'][i][0] * fulltime
 
@@ -164,6 +165,7 @@ def viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime):
 
     average_persentage = int((average_persentage / len(persentage))*100)
     average_fullsecond =  int((average_persentage / 100) * fulltime)
+
     average_time= str(datetime.timedelta(seconds=average_fullsecond))
     if average_time[:2] == '0:':
         average_time = average_time[2:]

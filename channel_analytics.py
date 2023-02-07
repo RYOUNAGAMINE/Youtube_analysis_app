@@ -148,12 +148,12 @@ def country_analysis(youtube_analytics,start_date,end_date):
         data = {'国名' : country_list,
             '視聴回数' : view_list,
             '視聴時間(時間)' : watch_minute_list,
-            '平均視聴時間(秒)': average_watch_time_list
+            '平均視聴時間': average_watch_time_list
         }
     )
     # df_country = df_country.style.highlight_max()
     df_country = df_country.style.format(formatter={('視聴時間(時間)'): "{:.1f}"})
-    
+
     return df_country
 
 def app_channel(youtube_analytics,start_date,end_date,period):
@@ -180,6 +180,7 @@ def app_channel(youtube_analytics,start_date,end_date,period):
     st.markdown(f'###### コメント  : {video_comments}個')
     st.markdown(f'###### 共有      : {video_shares}回')
     st.markdown(f'###### 登録者数  : {video_subscriber}人')
+
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graphs[0]
     channel_watch_hour = channel_basis_graphs[1]

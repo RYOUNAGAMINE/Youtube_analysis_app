@@ -2,7 +2,7 @@ def get_key(val,id_title):
     for key, value in id_title.items():
         if val == value:
             return key
-        
+
 def country_name(code):
     country_code_dictionary = {
         'JP' : '日本',
