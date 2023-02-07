@@ -151,10 +151,31 @@ def country_analysis(youtube_analytics,start_date,end_date):
             '平均視聴時間': average_watch_time_list
         }
     )
-    # df_country = df_country.style.highlight_max()
     df_country = df_country.style.format(formatter={('視聴時間(時間)'): "{:.1f}"})
-
     return df_country
+
+def device_analysis(youtube_analytics,start_date,end_date):
+    device_type_response = ap.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='deviceType',
+        metrics='views',
+        # sort='-shares'
+    )
+    device_type_response = device_type_response['rows']
+    device_name = []
+    device_views = []
+    for i in range(len(device_type_response)):
+        device_name.append(mf.device_name(device_type_response[i][0]))
+        device_views.append(device_type_response[i][1])
+    df_device_type = pd.DataFrame(
+        data = {'デバイス名' : device_name,
+            '視聴回数' : device_views
+        }
+    )
+    return df_device_type
 
 def app_channel(youtube_analytics,start_date,end_date,period):
 
@@ -181,20 +202,34 @@ def app_channel(youtube_analytics,start_date,end_date,period):
     st.markdown(f'###### 共有      : {video_shares}回')
     st.markdown(f'###### 登録者数  : {video_subscriber}人')
 
+
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
+
     channel_view = channel_basis_graphs[0]
     channel_watch_hour = channel_basis_graphs[1]
-    channel_subscriber = channel_basis_graphs[2]
 
-    col1, col2, col3= st.columns(3)
+    col1, col2= st.columns(2)
     with col1:
         st.plotly_chart(channel_view, use_container_width=True)
     with col2:
         st.plotly_chart(channel_watch_hour, use_container_width=True)
-    with col3:
-        st.plotly_chart(channel_subscriber, use_container_width=True)
 
+
+    channel_subscriber = channel_basis_graphs[2]
     channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
-    st.plotly_chart(channel_age_gender_graph, use_container_width=True)
+
+    col1, col2= st.columns(2)
+    with col1:
+        st.plotly_chart(channel_subscriber, use_container_width=True)
+    with col2:
+        st.plotly_chart(channel_age_gender_graph, use_container_width=True)
+
+
     df_country = country_analysis(youtube_analytics,start_date,end_date)
-    st.dataframe(df_country)
+    df_device = device_analysis(youtube_analytics,start_date,end_date)
+
+    col1, col2= st.columns(2)
+    with col1:
+        st.dataframe(df_country)
+    with col2:
+        st.dataframe(df_device)

@@ -106,9 +106,15 @@ def app_search(youtube):
     st.sidebar.write("""## 検索ワードと登録者数上限の設定""")
     st.sidebar.write("""### 検索ワードの入力""")
     query = st.sidebar.text_input('検索ワードを入力してください。', '沖縄 フカセ釣り')
+    if 'query'  not in st.session_state:
+        st.session_state['query'] = query
 
     st.sidebar.write("""### 登録者数上限の設定""")
     limiter = st.sidebar.slider("登録者数の閾値", 100, 1000000, 1000)
+    if 'limiter'  not in st.session_state:
+        st.session_state['limiter'] = limiter
+    # elif st.session_state['limiter'] != limiter:
+    #     st.session_state['limiter'] = limiter
 
     st.markdown('### 選択中のパラメータ')
     st.markdown(f"""
@@ -124,15 +130,21 @@ def app_search(youtube):
     if len(serch_video_titles) > 0:
         st.dataframe(results)
         selectbox_video_titles = []
-        for i in range(len(serch_video_titles)):
-            selectbox_video_title = f'{i}:{serch_video_titles[i]}'
-            selectbox_video_titles.append(selectbox_video_title)
 
-        st.session_state['video_titles'] = selectbox_video_titles
+        if 'video_titles'  not in st.session_state or st.session_state['query'] != query or st.session_state['limiter'] != limiter:
+            for i in range(len(serch_video_titles)):
+                selectbox_video_title = f'{i}:{serch_video_titles[i]}'
+                selectbox_video_titles.append(selectbox_video_title)
+            st.session_state['limiter'] = limiter
+            st.session_state['query'] = query
+            st.session_state['video_titles'] = selectbox_video_titles
+        else:
+            selectbox_video_titles = st.session_state['video_titles']
 
         if  'video_titles' in st.session_state:
             select_video_title = st.selectbox(label="動画を選択してください。",
             options=st.session_state['video_titles'])
+            st.session_state['video_titles'] = selectbox_video_titles
         else:
             select_video_title = st.selectbox(label="動画を選択してください。",
             options=selectbox_video_titles)
