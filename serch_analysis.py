@@ -1,14 +1,16 @@
 import streamlit as st
 import pandas as pd
 import app as ap
+import my_function as mf
 def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
     response = youtube.search().list(
-    q=q,
-    part="snippet",
-    order='viewCount',
-    type='video',
-    maxResults=max_results,
-    ).execute()
+        q=q,
+        part="snippet",
+        order='viewCount',
+        type='video',
+        maxResults=max_results,
+        ).execute()
+
 
     items_id = []
     items = response['items']
@@ -23,9 +25,7 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
 
 def get_results(df_video,youtube,limiter):
 
-    # channel_ids = df_video['channel_id'].unique().tolist()
     channel_ids = df_video['channel_id'].tolist()
-
 
     subscriber_list = youtube.channels().list(
     id=','.join(channel_ids),
@@ -94,10 +94,8 @@ def get_results(df_video,youtube,limiter):
 
     return results, serch_video_titles,serch_ids_titles
 
-def get_key(val,id_title):
-    for key, value in id_title.items():
-        if val == value:
-            return key
+
+
 
 
 
@@ -142,7 +140,7 @@ def app_search(youtube):
         idx = select_video_title.find(target)
         video_select_title = select_video_title[idx+1:]
 
-        video_id = get_key(video_select_title,serch_ids_titles)
+        video_id = mf.get_key(video_select_title,serch_ids_titles)
         video_field = st.empty()
         url = f'https://youtu.be/{video_id}'
         video_field.video(url)

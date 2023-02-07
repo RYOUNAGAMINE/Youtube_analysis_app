@@ -3,6 +3,7 @@ import plotly.express as px
 import re
 import datetime
 import streamlit as st
+import my_function as mf
 
 def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
     video_analysis = ap.execute_api_request(
@@ -44,10 +45,6 @@ def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
 
     return ids_titles,video_titles
 
-def get_key(val,id_title):
-    for key, value in id_title.items():
-        if val == value:
-            return key
 
 def channel_basis_reports(youtube_analytics,start_date,end_date,video_id):
     channel_analytics = ap.execute_api_request(
@@ -236,7 +233,7 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
         options=video_titles)
 
 
-    video_id = get_key(video_select_title,video_ids_titles)
+    video_id = mf.get_key(video_select_title,video_ids_titles)
     video_field = st.empty()
     url = f'https://youtu.be/{video_id}'
     if st.button('ビデオを表示する'):

@@ -2,6 +2,8 @@ import app as ap
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import datetime
+import my_function as mf
 
 def channel_basis_reports(youtube_analytics,start_date,end_date):
     channel_analytics = ap.execute_api_request(
@@ -115,6 +117,45 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
 
     return fig_view,fig_watch_hour,fig_subscriber
 
+def country_analysis(youtube_analytics,start_date,end_date):
+    result = ap.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='country',
+        metrics='views,estimatedMinutesWatched,averageViewDuration',
+        sort='-estimatedMinutesWatched'
+    )
+
+    result = result['rows']
+    country_list = []
+    view_list = []
+    watch_minute_list = []
+    average_watch_time_list = []
+
+
+    for i in range(len(result)):
+        country_list.append(mf.country_name(result[i][0]))
+        view_list.append(result[i][1])
+        watch_minute_list.append(round(result[i][2] / 60,1))
+        average_time = str(datetime.timedelta(seconds=result[i][3]))
+        average_watch_time_list.append(average_time)
+
+
+
+    df_country = pd.DataFrame(
+        data = {'国名' : country_list,
+            '視聴回数' : view_list,
+            '視聴時間(時間)' : watch_minute_list,
+            '平均視聴時間(秒)': average_watch_time_list
+        }
+    )
+    # df_country = df_country.style.highlight_max()
+    df_country = df_country.style.format(formatter={('視聴時間(時間)'): "{:.1f}"})
+    
+    return df_country
+
 def app_channel(youtube_analytics,start_date,end_date,period):
 
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
@@ -139,8 +180,6 @@ def app_channel(youtube_analytics,start_date,end_date,period):
     st.markdown(f'###### コメント  : {video_comments}個')
     st.markdown(f'###### 共有      : {video_shares}回')
     st.markdown(f'###### 登録者数  : {video_subscriber}人')
-    # st.dataframe(channel_basis_data)
-
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
     channel_view = channel_basis_graphs[0]
     channel_watch_hour = channel_basis_graphs[1]
@@ -156,3 +195,5 @@ def app_channel(youtube_analytics,start_date,end_date,period):
 
     channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
     st.plotly_chart(channel_age_gender_graph, use_container_width=True)
+    df_country = country_analysis(youtube_analytics,start_date,end_date)
+    st.dataframe(df_country)
