@@ -6,7 +6,7 @@ import datetime
 import my_function as mf
 
 def channel_basis_reports(youtube_analytics,start_date,end_date):
-    channel_analytics = ap.execute_api_request(
+    channel_analytics = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,
@@ -22,7 +22,7 @@ def channel_basis_reports(youtube_analytics,start_date,end_date):
     return channel_basis_data
 
 def age_gender_graph(youtube_analytics,start_date,end_date):
-    age_gender = ap.execute_api_request(
+    age_gender = mf.execute_api_request(
     youtube_analytics.reports().query,
     ids='channel==MINE',
     startDate=start_date,
@@ -64,7 +64,7 @@ def age_gender_graph(youtube_analytics,start_date,end_date):
     return fig
 
 def channel_basis_graph(youtube_analytics,start_date,end_date):
-    Channel_report_response = ap.execute_api_request(
+    Channel_report_response = mf.execute_api_request(
     youtube_analytics.reports().query,
     ids='channel==MINE',
     startDate=start_date,
@@ -118,7 +118,7 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     return fig_view,fig_watch_hour,fig_subscriber
 
 def country_analysis(youtube_analytics,start_date,end_date):
-    result = ap.execute_api_request(
+    result = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,
@@ -155,7 +155,7 @@ def country_analysis(youtube_analytics,start_date,end_date):
     return df_country
 
 def device_analysis(youtube_analytics,start_date,end_date):
-    device_type_response = ap.execute_api_request(
+    device_type_response = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,

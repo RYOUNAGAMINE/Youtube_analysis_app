@@ -1,18 +1,17 @@
 import streamlit as st
 import plotly.express as px
-import datetime
 import asyncio
 import os
 import re
 import json
 from dateutil.relativedelta import relativedelta
+import my_function as mf
 
 import pandas as pd
 import traceback
-import datetime
 import channel_analytics as ca
 import video_analytics as va
-import serch_analysis as sa
+import search_analysis as sa
 import oauthlib
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -35,58 +34,9 @@ with open('secret.json') as f:
 DEVELOPER_KEY = secret['KEY']
 CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
 
-def get_login_str():
-
-    return f'''
-    <a target="_self"
-    href="{authorization_url}">Google login</a>'''
-
-def execute_api_request(client_library_function, **kwargs):
-    response = client_library_function(
-    **kwargs
-    ).execute()
-    return response
 
 
-def credentials_to_dict(credentials):
-    return {'token': credentials.token,
-    'refresh_token': credentials.refresh_token,
-    'token_uri': credentials.token_uri,
-    'client_id': credentials.client_id,
-    'client_secret': credentials.client_secret,
-    'scopes': credentials.scopes}
 
-def time_select():
-
-    if period == "過去7日間":
-        start_date = datetime.date.today() - datetime.timedelta(days=6)
-        end_date = datetime.date.today()
-    elif period == "過去30日間":
-        start_date =  datetime.date.today() - datetime.timedelta(days=29)
-        end_date = datetime.date.today()
-    elif period == "過去180日間":
-        start_date = datetime.date.today() - datetime.timedelta(days=179)
-        end_date = datetime.date.today()
-    elif period == "過去360日間":
-        start_date = datetime.date.today() - datetime.timedelta(days=359)
-        end_date = datetime.date.today()
-    elif period == "全期間":
-        start_date = datetime.date(2020,4,26)
-        end_date = datetime.date.today()
-    elif period == "カスタム":
-        start_date = st.date_input(
-        '開始日',
-        datetime.date.today() - relativedelta(months=1),
-        datetime.date(2020,4,26),
-        datetime.date.today() - datetime.timedelta(days=1)
-        )
-        end_date = st.date_input(
-        '終了日',
-        datetime.date.today(),
-        start_date + datetime.timedelta(days=1),
-        datetime.date.today()
-        )
-    return start_date, end_date
 
 
 
@@ -128,14 +78,14 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
         if  'credentials' in st.session_state:
             credentials = google.oauth2.credentials.Credentials(
         **st.session_state['credentials'])
-            st.session_state['credentials']=credentials_to_dict(credentials)
+            st.session_state['credentials']=mf.credentials_to_dict(credentials)
 
         else:
             authorization_response = st.experimental_get_query_params()['code']
             authorization_response=authorization_response[0]
             flow.fetch_token(code=authorization_response)
             credentials = flow.credentials
-            st.session_state['credentials']=credentials_to_dict(credentials)
+            st.session_state['credentials']=mf.credentials_to_dict(credentials)
             st.balloons()
 
 
@@ -145,21 +95,19 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
         if page ==ca or page ==va:
             period = st.selectbox('期間を指定してください。',('過去7日間','過去30日間','過去180日間','過去360日間','全期間','カスタム'))
-            periods = time_select()
+            periods = mf.time_select(period)
             start_date = periods[0]
             end_date = periods[1]
 
         if page == ca:
             page.app_channel(youtube_analytics,start_date,end_date,period)
-
-        if page == va:
+        elif page == va:
             page.app_video(youtube_analytics,youtube,start_date,end_date,period)
-
-        if page == sa:
+        elif page == sa:
             page.app_search(youtube)
 
     except oauthlib.oauth2.rfc6749.errors.InvalidGrantError:#リロードによる認証の無効に対するエラー処理
-        st.write(get_login_str(),unsafe_allow_html=True)
+        st.write(mf.get_login_str(authorization_url),unsafe_allow_html=True)
         st.write("リンクから認証を行ってください。")
         print("リンクから認証を行ってください。1")
         traceback.print_exc()

@@ -5,8 +5,9 @@ import datetime
 import streamlit as st
 import my_function as mf
 
+
 def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
-    video_analysis = ap.execute_api_request(
+    video_analysis = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=datetime.date(2020,4,26),
@@ -47,7 +48,7 @@ def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
 
 
 def channel_basis_reports(youtube_analytics,start_date,end_date,video_id):
-    channel_analytics = ap.execute_api_request(
+    channel_analytics = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,
@@ -61,7 +62,7 @@ def channel_basis_reports(youtube_analytics,start_date,end_date,video_id):
     return video_basis_data
 
 def video_graph_function(youtube_analytics,start_date,end_date,video_id):
-    video_report_graph = ap.execute_api_request(
+    video_report_graph = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,
@@ -137,7 +138,7 @@ def time_minute(youtube,video_id):
 
 
 def viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime):
-    result = ap.execute_api_request(
+    result = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
         startDate=start_date,
@@ -181,7 +182,7 @@ def viewing_function(youtube_analytics,start_date,end_date,video_id,fulltime):
     return fig,average_persentage,average_time
 
 def age_gender_graph_video(youtube_analytics,start_date,end_date,video_id):
-    age_gender = ap.execute_api_request(
+    age_gender = mf.execute_api_request(
     youtube_analytics.reports().query,
     ids='channel==MINE',
     startDate=start_date,

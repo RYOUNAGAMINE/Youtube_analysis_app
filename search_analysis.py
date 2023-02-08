@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import app as ap
 import my_function as mf
+
 def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
     response = youtube.search().list(
         q=q,
@@ -19,9 +20,9 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
         item_id['video_id'] = item['id']['videoId']
         item_id['channel_id'] = item['snippet']['channelId']
         items_id.append(item_id)
-    df_video = pd.DataFrame(items_id)
+    df_video_channel_ids = pd.DataFrame(items_id)
 
-    return df_video
+    return df_video_channel_ids
 
 def get_results(df_video,youtube,limiter):
 
@@ -65,10 +66,12 @@ def get_results(df_video,youtube,limiter):
         video_info['video_id'] = item['id']
         video_info['動画のタイトル'] = item['snippet']['title']
         video_info['視聴回数'] = item['statistics']['viewCount']
+
         if 'likeCount' in item['statistics'].keys():#高評価が隠されていた時の処理
             video_info['高評価'] = item['statistics']['likeCount']
         else:
             video_info['高評価'] =""
+
         if 'commentCount' in item['statistics'].keys():#コメントが隠されていた時の処理
             video_info['コメント数'] = item['statistics']['commentCount']
         else:
@@ -77,11 +80,11 @@ def get_results(df_video,youtube,limiter):
 
     df_videos_info = pd.DataFrame(videos_info)
     if len(videos_info) > 0:
-        serch_video_ids = df_videos_info['video_id'].tolist()
-        serch_video_titles = df_videos_info['動画のタイトル'].tolist()
-        serch_ids_titles = {}
-        for i in range(len(serch_video_titles)):
-            serch_ids_titles[f'{serch_video_ids[i]}'] = serch_video_titles[i]
+        search_video_ids = df_videos_info['video_id'].tolist()
+        search_video_titles = df_videos_info['動画のタイトル'].tolist()
+        search_ids_titles = {}
+        for i in range(len(search_video_titles)):
+            search_ids_titles[f'{search_video_ids[i]}'] = search_video_titles[i]
 
         results = pd.merge(left=df_extracted, right=df_videos_info, on='video_id')
         results = results.drop(['video_id', 'channel_id'], axis=1)
@@ -89,17 +92,10 @@ def get_results(df_video,youtube,limiter):
         results = results.loc[:, ['動画のタイトル', '視聴回数', '高評価','コメント数','チャンネル名','チャンネル登録数']]
     elif len(videos_info) == 0:
         results = ""
-        serch_video_titles = ""
-        serch_ids_titles = ""
+        search_video_titles = ""
+        search_ids_titles = ""
 
-    return results, serch_video_titles,serch_ids_titles
-
-
-
-
-
-
-
+    return results, search_video_titles,search_ids_titles
 
 
 def app_search(youtube):
@@ -122,24 +118,39 @@ def app_search(youtube):
     - 登録者数の閾値: {limiter}
     """)
 
-    df_video = video_search(youtube, q=query, max_results=50)
-    results = get_results(df_video,youtube, limiter=limiter)[0]
-    serch_video_titles = get_results(df_video,youtube, limiter=limiter)[1]
-    serch_ids_titles = get_results(df_video,youtube, limiter=limiter)[2]
+    if 'results'  not in st.session_state:
+        df_search_video_channel_ids = video_search(youtube, q=query, max_results=50)
+        results = get_results(df_search_video_channel_ids,youtube, limiter=limiter)
+        df_search_analysis = results[0]
+        search_video_titles = results[1]
+        search_ids_titles = results[2]
+        st.session_state['results'] = results
+
     st.write("### 検索結果")
-    if len(serch_video_titles) > 0:
-        st.dataframe(results)
+    if len(st.session_state['results'][1]) > 0:
         selectbox_video_titles = []
 
         if 'video_titles'  not in st.session_state or st.session_state['query'] != query or st.session_state['limiter'] != limiter:
-            for i in range(len(serch_video_titles)):
-                selectbox_video_title = f'{i}:{serch_video_titles[i]}'
+            df_search_video_channel_ids = video_search(youtube, q=query, max_results=50)
+            results = get_results(df_search_video_channel_ids,youtube, limiter=limiter)
+            df_search_analysis = results[0]
+            search_video_titles = results[1]
+            search_ids_titles = results[2]
+            st.session_state['results'] = results
+
+            for i in range(len(search_video_titles)):
+                selectbox_video_title = f'{i}:{search_video_titles[i]}'
                 selectbox_video_titles.append(selectbox_video_title)
             st.session_state['limiter'] = limiter
             st.session_state['query'] = query
             st.session_state['video_titles'] = selectbox_video_titles
         else:
             selectbox_video_titles = st.session_state['video_titles']
+            df_search_analysis = st.session_state['results'][0]
+            search_video_titles = st.session_state['results'][1]
+            search_ids_titles = st.session_state['results'][2]
+        print(df_search_analysis)
+        st.dataframe(df_search_analysis)
 
         if  'video_titles' in st.session_state:
             select_video_title = st.selectbox(label="動画を選択してください。",
@@ -154,7 +165,7 @@ def app_search(youtube):
         idx = select_video_title.find(target)
         video_select_title = select_video_title[idx+1:]
 
-        video_id = mf.get_key(video_select_title,serch_ids_titles)
+        video_id = mf.get_key(video_select_title,search_ids_titles)
         video_field = st.empty()
         url = f'https://youtu.be/{video_id}'
         video_field.video(url)
@@ -164,6 +175,6 @@ def app_search(youtube):
         if st.button('ビデオを表示する'):
                 video_field.video(url)
 
-    elif results == "":
+    else:
         st.write("登録者数上限以下の動画が見つかりませんでした。登録者数の上限を変更してください。")
 
