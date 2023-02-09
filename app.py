@@ -36,12 +36,6 @@ CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
 
 
 
-
-
-
-
-
-
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES_ANALYTICS)
 flow.redirect_uri = 'http://localhost:8501'
 

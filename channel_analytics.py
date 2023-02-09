@@ -177,6 +177,29 @@ def device_analysis(youtube_analytics,start_date,end_date):
     )
     return df_device_type
 
+def traffic_source_analysis(youtube_analytics,start_date,end_date):
+    traffic_source_type_response = mf.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='insightTrafficSourceType',
+        metrics='views',
+        sort='-views'
+    )
+    traffic_source_type_response = traffic_source_type_response['rows']
+    traffic_source_name = []
+    traffic_source_views = []
+    for i in range(len(traffic_source_type_response)):
+        traffic_source_name.append(mf.traffic_name(traffic_source_type_response[i][0]))
+        traffic_source_views.append(traffic_source_type_response[i][1])   
+
+    df_traffic_source_type = pd.DataFrame(
+    data = {'トラフィックソース名' : traffic_source_name,
+            '視聴回数' : traffic_source_views
+    })
+    return df_traffic_source_type
+
 def app_channel(youtube_analytics,start_date,end_date,period):
 
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
@@ -227,9 +250,12 @@ def app_channel(youtube_analytics,start_date,end_date,period):
 
     df_country = country_analysis(youtube_analytics,start_date,end_date)
     df_device = device_analysis(youtube_analytics,start_date,end_date)
-
-    col1, col2= st.columns(2)
+    df_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
+    
+    col1, col2,col3= st.columns(3)
     with col1:
         st.dataframe(df_country)
     with col2:
         st.dataframe(df_device)
+    with col3:
+        st.dataframe(df_traffic_source)

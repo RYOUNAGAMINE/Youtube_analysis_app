@@ -84,3 +84,27 @@ def device_name(device_code):
     for key, value in device_code_dictionary.items():
         if device_code == key:
             return value
+
+def traffic_name(traffic_source_code):
+    traffic_source_code_dictionary = {
+        'NO_LINK_OTHER' : '	直接or不明',
+        'SUBSCRIBER' : 'ブラウジング機能(あなたへのおすすめ)',
+        'YT_CHANNEL' : 'チャンネルページ',
+        'YT_SEARCH' : '	YouTube内検索',
+        'RELATED_VIDEO' : '	関連動画',
+        'YT_OTHER_PAGE' : 'その他のYouTube',
+        'EXT_URL' : '外部サイト',
+        'ANNOTATION' : 'アノテーション',
+        'PLAYLIST' : '再生リスト',
+        'NOTIFICATION' : 'Youtube通知',
+        'YT_PLAYLIST_PAGE' : '再生リストページ',
+        'END_SCREEN' : '別動画の終了画面',
+        'HASHTAGS' : 'ハッシュタグ',
+    }
+    for key, value in traffic_source_code_dictionary.items():
+        if traffic_source_code == key:
+            return value
+    return 'その他'
+
+
+
