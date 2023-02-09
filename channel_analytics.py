@@ -190,13 +190,20 @@ def traffic_source_analysis(youtube_analytics,start_date,end_date):
     traffic_source_type_response = traffic_source_type_response['rows']
     traffic_source_name = []
     traffic_source_views = []
+    traffic_source_persenstages = []
+    traffic_source_sum = 0
+    for i in range(len(traffic_source_type_response)):
+        traffic_source_sum += traffic_source_type_response[i][1]
     for i in range(len(traffic_source_type_response)):
         traffic_source_name.append(mf.traffic_name(traffic_source_type_response[i][0]))
-        traffic_source_views.append(traffic_source_type_response[i][1])   
+        traffic_source_views.append(traffic_source_type_response[i][1])
+        traffic_source_persenstage = round((int(traffic_source_type_response[i][1]) / traffic_source_sum)*100,1)
+        traffic_source_persenstages.append(f'{traffic_source_persenstage}' + '%')
 
     df_traffic_source_type = pd.DataFrame(
     data = {'トラフィックソース名' : traffic_source_name,
-            '視聴回数' : traffic_source_views
+            '視聴回数' : traffic_source_views,
+            '' : traffic_source_persenstages
     })
     return df_traffic_source_type
 
@@ -251,7 +258,7 @@ def app_channel(youtube_analytics,start_date,end_date,period):
     df_country = country_analysis(youtube_analytics,start_date,end_date)
     df_device = device_analysis(youtube_analytics,start_date,end_date)
     df_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
-    
+
     col1, col2,col3= st.columns(3)
     with col1:
         st.dataframe(df_country)

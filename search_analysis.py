@@ -19,7 +19,8 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
         item_id = {}
         item_id['video_id'] = item['id']['videoId']
         item_id['channel_id'] = item['snippet']['channelId']
-        items_id.append(item_id)
+        if len(items_id) <= 50:#video_searchでmax_resultsを50にしても51個のデータを取ってくることがあるため
+            items_id.append(item_id)
     df_video_channel_ids = pd.DataFrame(items_id)
 
     return df_video_channel_ids
@@ -27,7 +28,7 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
 def get_results(df_video,youtube,limiter):
 
     channel_ids = df_video['channel_id'].tolist()
-
+    print(channel_ids)
     subscriber_list = youtube.channels().list(
     id=','.join(channel_ids),
     part='snippet,statistics',
@@ -109,8 +110,7 @@ def app_search(youtube):
     limiter = st.sidebar.slider("登録者数の閾値", 100, 1000000, 1000)
     if 'limiter'  not in st.session_state:
         st.session_state['limiter'] = limiter
-    # elif st.session_state['limiter'] != limiter:
-    #     st.session_state['limiter'] = limiter
+
 
     st.markdown('### 選択中のパラメータ')
     st.markdown(f"""

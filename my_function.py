@@ -88,7 +88,7 @@ def device_name(device_code):
 def traffic_name(traffic_source_code):
     traffic_source_code_dictionary = {
         'NO_LINK_OTHER' : '	直接or不明',
-        'SUBSCRIBER' : 'ブラウジング機能(あなたへのおすすめ)',
+        'SUBSCRIBER' : 'ブラウジング機能',
         'YT_CHANNEL' : 'チャンネルページ',
         'YT_SEARCH' : '	YouTube内検索',
         'RELATED_VIDEO' : '	関連動画',
