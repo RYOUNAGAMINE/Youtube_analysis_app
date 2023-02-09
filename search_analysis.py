@@ -118,26 +118,24 @@ def app_search(youtube):
     - 登録者数の閾値: {limiter}
     """)
 
-    if 'results'  not in st.session_state:
+    if 'results'  not in st.session_state or st.session_state['query'] != query or st.session_state['limiter'] != limiter:
         df_search_video_channel_ids = video_search(youtube, q=query, max_results=50)
         results = get_results(df_search_video_channel_ids,youtube, limiter=limiter)
         df_search_analysis = results[0]
         search_video_titles = results[1]
         search_ids_titles = results[2]
         st.session_state['results'] = results
+    else:
+        selectbox_video_titles = st.session_state['video_titles']
+        df_search_analysis = st.session_state['results'][0]
+        search_video_titles = st.session_state['results'][1]
+        search_ids_titles = st.session_state['results'][2]
 
     st.write("### 検索結果")
     if len(st.session_state['results'][1]) > 0:
         selectbox_video_titles = []
 
         if 'video_titles'  not in st.session_state or st.session_state['query'] != query or st.session_state['limiter'] != limiter:
-            df_search_video_channel_ids = video_search(youtube, q=query, max_results=50)
-            results = get_results(df_search_video_channel_ids,youtube, limiter=limiter)
-            df_search_analysis = results[0]
-            search_video_titles = results[1]
-            search_ids_titles = results[2]
-            st.session_state['results'] = results
-
             for i in range(len(search_video_titles)):
                 selectbox_video_title = f'{i}:{search_video_titles[i]}'
                 selectbox_video_titles.append(selectbox_video_title)
@@ -146,20 +144,11 @@ def app_search(youtube):
             st.session_state['video_titles'] = selectbox_video_titles
         else:
             selectbox_video_titles = st.session_state['video_titles']
-            df_search_analysis = st.session_state['results'][0]
-            search_video_titles = st.session_state['results'][1]
-            search_ids_titles = st.session_state['results'][2]
-        print(df_search_analysis)
-        st.dataframe(df_search_analysis)
 
-        if  'video_titles' in st.session_state:
-            select_video_title = st.selectbox(label="動画を選択してください。",
-            options=st.session_state['video_titles'])
-            st.session_state['video_titles'] = selectbox_video_titles
-        else:
-            select_video_title = st.selectbox(label="動画を選択してください。",
-            options=selectbox_video_titles)
-            st.session_state['video_titles'] = selectbox_video_titles
+        st.dataframe(df_search_analysis)
+        select_video_title = st.selectbox(label="動画を選択してください。",
+        options=selectbox_video_titles)
+
 
         target = ':'
         idx = select_video_title.find(target)

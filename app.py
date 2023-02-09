@@ -113,7 +113,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
         traceback.print_exc()
 
     except google.auth.exceptions.RefreshError:#アクセストークンの有効期限が切れたときのエラー処理
-        st.write(get_login_str(),unsafe_allow_html=True)
+        st.write(mf.get_login_str(authorization_url),unsafe_allow_html=True)
         st.write("リンクから認証を行ってください。")
         traceback.print_exc()
         print("リンクから認証を行ってください。2")
@@ -132,5 +132,5 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
         print ('正常に処理が完了しました')
 
 else:
-    st.write(get_login_str(),unsafe_allow_html=True)
+    st.write(mf.get_login_str(authorization_url),unsafe_allow_html=True)
     st.write("リンクから認証を行ってください。")
