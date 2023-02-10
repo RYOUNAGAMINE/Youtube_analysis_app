@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import app as ap
 import my_function as mf
+import datetime
 
 def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
     response = youtube.search().list(
@@ -28,7 +29,7 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
 def get_results(df_video,youtube,limiter):
 
     channel_ids = df_video['channel_id'].tolist()
-    print(channel_ids)
+    
     subscriber_list = youtube.channels().list(
     id=','.join(channel_ids),
     part='snippet,statistics',
@@ -56,7 +57,7 @@ def get_results(df_video,youtube,limiter):
     videos_list = youtube.videos().list(
     part='snippet,statistics',
     id=','.join(video_ids),
-    fields='items(id,snippet(title),statistics(viewCount,likeCount,commentCount))'
+    fields='items(id,snippet(title,publishedAt),statistics(viewCount,likeCount,commentCount))'
     ).execute()
 
     videos_info = []
@@ -66,6 +67,8 @@ def get_results(df_video,youtube,limiter):
         video_info = {}
         video_info['video_id'] = item['id']
         video_info['動画のタイトル'] = item['snippet']['title']
+        # video_info['アップロード日'] = item['snippet']['publishedAt']
+        video_info['アップロード日'] = datetime.datetime.fromisoformat(item['snippet']['publishedAt']).date()
         video_info['視聴回数'] = item['statistics']['viewCount']
 
         if 'likeCount' in item['statistics'].keys():#高評価が隠されていた時の処理
@@ -90,13 +93,14 @@ def get_results(df_video,youtube,limiter):
         results = pd.merge(left=df_extracted, right=df_videos_info, on='video_id')
         results = results.drop(['video_id', 'channel_id'], axis=1)
         #     カラム並び替え
-        results = results.loc[:, ['動画のタイトル', '視聴回数', '高評価','コメント数','チャンネル名','チャンネル登録数']]
+        results = results.loc[:, ['動画のタイトル', 'アップロード日','視聴回数', '高評価','コメント数','チャンネル名','チャンネル登録数']]
     elif len(videos_info) == 0:
         results = ""
         search_video_titles = ""
         search_ids_titles = ""
 
     return results, search_video_titles,search_ids_titles
+
 
 
 def app_search(youtube):

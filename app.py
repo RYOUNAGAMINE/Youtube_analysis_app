@@ -54,16 +54,14 @@ st.set_page_config(
 
 st.title("Youtube分析ダッシュボード")
 
-
-
-PAGES = {
-    "チャンネルのアナリティクス": ca,
-    "動画のアナリティクス": va,
-    "競合動画のリサーチ": sa
-}
+pages = [
+    "チャンネルのアナリティクス",
+    "動画のアナリティクス",
+    "競合動画のリサーチ"
+]
 st.sidebar.title('メニュー')
-selection_analytics = st.sidebar.radio("選択してください。", list(PAGES.keys()))
-page = PAGES[selection_analytics]
+selection_analytics = st.sidebar.radio("選択してください。", pages)
+
 
 st.sidebar.button("リロード")
 
@@ -87,18 +85,18 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
         youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
         youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
 
-        if page ==ca or page ==va:
+        if selection_analytics =="チャンネルのアナリティクス" or selection_analytics =="動画のアナリティクス":
             period = st.selectbox('期間を指定してください。',('過去7日間','過去30日間','過去180日間','過去360日間','全期間','カスタム'))
             periods = mf.time_select(period)
             start_date = periods[0]
             end_date = periods[1]
 
-        if page == ca:
-            page.app_channel(youtube_analytics,start_date,end_date,period)
-        elif page == va:
-            page.app_video(youtube_analytics,youtube,start_date,end_date,period)
-        elif page == sa:
-            page.app_search(youtube)
+        if selection_analytics == "チャンネルのアナリティクス":
+            ca.app_channel(youtube_analytics,start_date,end_date,period)
+        elif selection_analytics == "動画のアナリティクス":
+            va.app_video(youtube_analytics,youtube,start_date,end_date,period)
+        elif selection_analytics == "競合動画のリサーチ":
+            sa.app_search(youtube)
 
     except oauthlib.oauth2.rfc6749.errors.InvalidGrantError:#リロードによる認証の無効に対するエラー処理
         st.write(mf.get_login_str(authorization_url),unsafe_allow_html=True)

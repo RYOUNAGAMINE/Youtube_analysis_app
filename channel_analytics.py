@@ -207,6 +207,40 @@ def traffic_source_analysis(youtube_analytics,start_date,end_date):
     })
     return df_traffic_source_type
 
+def search_word_analysis(youtube_analytics,start_date,end_date):
+
+    search_word_response = mf.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='insightTrafficSourceDetail',
+        metrics='views',
+        # filters='video==lOUzyycfXHw;insightTrafficSourceType==YT_SEARCH',
+        filters='insightTrafficSourceType==YT_SEARCH',
+        maxResults=25,
+        sort='-views'
+    )
+    search_word_response = search_word_response['rows']
+    search_word_name = []
+    search_word_views = []
+    search_word_persenstages = []
+    search_word_sum = 0
+    for i in range(len(search_word_response)):
+        search_word_sum += search_word_response[i][1]
+    for i in range(len(search_word_response)):
+        search_word_name.append(search_word_response[i][0])
+        search_word_views.append(search_word_response[i][1])   
+        search_word_persenstage = round((int(search_word_response[i][1]) / search_word_sum)*100,1)
+        search_word_persenstages.append(f'{search_word_persenstage}' + '%')
+    df_search_word_response = pd.DataFrame(
+    data = {'検索ワード' : search_word_name,
+            '視聴回数' : search_word_views,
+            '' : search_word_persenstages
+        })
+
+    return df_search_word_response
+
 def app_channel(youtube_analytics,start_date,end_date,period):
 
     channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
@@ -257,12 +291,16 @@ def app_channel(youtube_analytics,start_date,end_date,period):
 
     df_country = country_analysis(youtube_analytics,start_date,end_date)
     df_device = device_analysis(youtube_analytics,start_date,end_date)
-    df_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
-
+    df_channel_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
+    df_channel_search_word  = search_word_analysis(youtube_analytics,start_date,end_date)
+    
     col1, col2,col3= st.columns(3)
     with col1:
         st.dataframe(df_country)
     with col2:
         st.dataframe(df_device)
     with col3:
-        st.dataframe(df_traffic_source)
+        st.dataframe(df_channel_traffic_source)
+    
+    st.dataframe(df_channel_search_word)
+    

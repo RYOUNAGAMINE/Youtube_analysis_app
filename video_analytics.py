@@ -4,7 +4,7 @@ import re
 import datetime
 import streamlit as st
 import my_function as mf
-
+import pandas as pd
 
 def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
     video_analysis = mf.execute_api_request(
@@ -225,7 +225,71 @@ def age_gender_graph_video(youtube_analytics,start_date,end_date,video_id):
     return fig
 
 # def title_session():
+def traffic_source_analysis(youtube_analytics,start_date,end_date,video_id):
+    traffic_source_type_response = mf.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='insightTrafficSourceType',
+        metrics='views',
+        sort='-views',
+        filters=f'video=={video_id}'
+    )
+    traffic_source_type_response = traffic_source_type_response['rows']
+    traffic_source_name = []
+    traffic_source_views = []
+    traffic_source_persenstages = []
+    traffic_source_sum = 0
+    for i in range(len(traffic_source_type_response)):
+        traffic_source_sum += traffic_source_type_response[i][1]
+    for i in range(len(traffic_source_type_response)):
+        traffic_source_name.append(mf.traffic_name(traffic_source_type_response[i][0]))
+        traffic_source_views.append(traffic_source_type_response[i][1])
+        traffic_source_persenstage = round((int(traffic_source_type_response[i][1]) / traffic_source_sum)*100,1)
+        traffic_source_persenstages.append(f'{traffic_source_persenstage}' + '%')
 
+    df_traffic_source_type = pd.DataFrame(
+    data = {'トラフィックソース名' : traffic_source_name,
+        '視聴回数' : traffic_source_views,
+        '' : traffic_source_persenstages
+    })
+    return df_traffic_source_type
+
+def search_word_analysis(youtube_analytics,start_date,end_date,video_id):
+
+
+    search_word_response = mf.execute_api_request(
+        youtube_analytics.reports().query,
+        ids='channel==MINE',
+        startDate=start_date,
+        endDate=end_date,
+        dimensions='insightTrafficSourceDetail',
+        metrics='views',
+        filters=f'video=={video_id};insightTrafficSourceType==YT_SEARCH',
+        # filters='insightTrafficSourceType==YT_SEARCH',
+        maxResults=25,
+        sort='-views'
+    )
+    search_word_response = search_word_response['rows']
+    search_word_name = []
+    search_word_views = []
+    search_word_persenstages = []
+    search_word_sum = 0
+    for i in range(len(search_word_response)):
+        search_word_sum += search_word_response[i][1]
+    for i in range(len(search_word_response)):
+        search_word_name.append(search_word_response[i][0])
+        search_word_views.append(search_word_response[i][1])   
+        search_word_persenstage = round((int(search_word_response[i][1]) / search_word_sum)*100,1)
+        search_word_persenstages.append(f'{search_word_persenstage}' + '%')
+    df_search_word_response = pd.DataFrame(
+    data = {'検索ワード' : search_word_name,
+            '視聴回数' : search_word_views,
+            '' : search_word_persenstages
+        })
+
+    return df_search_word_response
 
 def app_video(youtube_analytics,youtube,start_date,end_date,period):
     ids_titles_list = ids_titles_function(youtube_analytics,start_date,youtube)
@@ -271,13 +335,27 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
     video_view = video_graphs[0]
     video_watch_hour = video_graphs[1]
     video_subscriber = video_graphs[2]
-    col1, col2, col3= st.columns(3)
-    with col1:
+    
+    graphs = [
+    "視聴回数",
+    "視聴時間",
+    "登録者数"
+    ]
+    selection_graph = st.radio("表示したいグラフを選択してください。", graphs)
+    
+    if selection_graph == "視聴回数":
         st.plotly_chart(video_view, use_container_width=True)
-    with col2:
+    elif selection_graph == "視聴時間":
         st.plotly_chart(video_watch_hour, use_container_width=True)
-    with col3:
+    elif selection_graph == "登録者数":
         st.plotly_chart(video_subscriber, use_container_width=True)
+    # col1, col2, col3= st.columns(3)
+    # with col1:
+    #     st.plotly_chart(video_view, use_container_width=True)
+    # with col2:
+    #     st.plotly_chart(video_watch_hour, use_container_width=True)
+    # with col3:
+    #     st.plotly_chart(video_subscriber, use_container_width=True)
 
 
 
@@ -293,3 +371,9 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
 
     video_age_gender_graph= age_gender_graph_video(youtube_analytics,start_date,end_date,video_id)
     st.write(video_age_gender_graph)
+
+    df_video_traffic_source= traffic_source_analysis(youtube_analytics,start_date,end_date,video_id)
+    st.dataframe(df_video_traffic_source)
+    
+    df_video_search_word  = search_word_analysis(youtube_analytics,start_date,end_date,video_id)
+    st.dataframe(df_video_search_word)
