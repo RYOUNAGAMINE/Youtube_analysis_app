@@ -2,16 +2,19 @@ import streamlit as st
 import datetime
 from dateutil.relativedelta import relativedelta
 
+
 def get_login_str(authorization_url):
     return f'''
     <a target="_self"
     href="{authorization_url}">Google login</a>'''
+
 
 def execute_api_request(client_library_function, **kwargs):
     response = client_library_function(
     **kwargs
     ).execute()
     return response
+
 
 def credentials_to_dict(credentials):
     return {'token': credentials.token,
@@ -20,6 +23,7 @@ def credentials_to_dict(credentials):
     'client_id': credentials.client_id,
     'client_secret': credentials.client_secret,
     'scopes': credentials.scopes}
+
 
 def time_select(period):
     if period == "過去7日間":
@@ -52,10 +56,12 @@ def time_select(period):
         )
     return start_date, end_date
 
+
 def get_key(val,id_title):
     for key, value in id_title.items():
         if val == value:
             return key
+
 
 def country_name(code):
     country_code_dictionary = {
@@ -67,10 +73,12 @@ def country_name(code):
         'MX' : 'メキシコ',
         'ID' : 'インドネシア'
     }
+
     for key, value in country_code_dictionary.items():
         if code == key:
             return value
     return('不明な国')
+
 
 def device_name(device_code):
     device_code_dictionary = {
@@ -81,9 +89,11 @@ def device_name(device_code):
         'TV' : 'テレビ',
         'UNKNOWN_PLATFORM' : '不明なデバイス'
     }
+
     for key, value in device_code_dictionary.items():
         if device_code == key:
             return value
+
 
 def traffic_name(traffic_source_code):
     traffic_source_code_dictionary = {
@@ -101,6 +111,7 @@ def traffic_name(traffic_source_code):
         'END_SCREEN' : '別動画の終了画面',
         'HASHTAGS' : 'ハッシュタグ',
     }
+
     for key, value in traffic_source_code_dictionary.items():
         if traffic_source_code == key:
             return value

@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
+import datetime
 import app as ap
 import my_function as mf
-import datetime
 
 def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
     response = youtube.search().list(
@@ -12,7 +12,6 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
         type='video',
         maxResults=max_results,
         ).execute()
-
 
     items_id = []
     items = response['items']
@@ -27,15 +26,15 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
     return df_video_channel_ids
 
 def get_results(df_video,youtube,limiter):
-
     channel_ids = df_video['channel_id'].tolist()
-    
+
+    print(channel_ids)
+    print(len(channel_ids))
     subscriber_list = youtube.channels().list(
     id=','.join(channel_ids),
     part='snippet,statistics',
     fields = 'items(id,statistics(subscriberCount),snippet(title))'
     ).execute()
-
     subscribers = []
     for item in subscriber_list['items']:
         subscriber = {}
@@ -67,8 +66,7 @@ def get_results(df_video,youtube,limiter):
         video_info = {}
         video_info['video_id'] = item['id']
         video_info['動画のタイトル'] = item['snippet']['title']
-        # video_info['アップロード日'] = item['snippet']['publishedAt']
-        video_info['アップロード日'] = datetime.datetime.fromisoformat(item['snippet']['publishedAt']).date()
+        video_info['アップロード日'] = item['snippet']['publishedAt'][:10]
         video_info['視聴回数'] = item['statistics']['viewCount']
 
         if 'likeCount' in item['statistics'].keys():#高評価が隠されていた時の処理
@@ -101,8 +99,6 @@ def get_results(df_video,youtube,limiter):
 
     return results, search_video_titles,search_ids_titles
 
-
-
 def app_search(youtube):
     st.sidebar.write("""## 検索ワードと登録者数上限の設定""")
     st.sidebar.write("""### 検索ワードの入力""")
@@ -111,7 +107,7 @@ def app_search(youtube):
         st.session_state['query'] = query
 
     st.sidebar.write("""### 登録者数上限の設定""")
-    limiter = st.sidebar.slider("登録者数の閾値", 100, 1000000, 1000)
+    limiter = st.sidebar.slider("登録者数の閾値", 100, 1300000, 1000)
     if 'limiter'  not in st.session_state:
         st.session_state['limiter'] = limiter
 
@@ -153,12 +149,11 @@ def app_search(youtube):
         select_video_title = st.selectbox(label="動画を選択してください。",
         options=selectbox_video_titles)
 
-
         target = ':'
         idx = select_video_title.find(target)
         video_select_title = select_video_title[idx+1:]
-
         video_id = mf.get_key(video_select_title,search_ids_titles)
+
         video_field = st.empty()
         url = f'https://youtu.be/{video_id}'
         video_field.video(url)

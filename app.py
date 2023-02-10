@@ -1,17 +1,13 @@
 import streamlit as st
-import plotly.express as px
-import asyncio
-import os
-import re
 import json
-from dateutil.relativedelta import relativedelta
-import my_function as mf
-
-import pandas as pd
+import os
 import traceback
+
 import channel_analytics as ca
 import video_analytics as va
 import search_analysis as sa
+import my_function as mf
+
 import oauthlib
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -19,11 +15,11 @@ from googleapiclient.discovery import build
 import googleapiclient
 
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 SCOPES_ANALYTICS = ['https://www.googleapis.com/auth/yt-analytics.readonly']
 API_SERVICE_NAME_ANALYTICS = 'youtubeAnalytics'
 API_VERSION_ANALYTICS = 'v2'
-
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 SCOPES_YOUTUBE= ['https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME_YOUYUBE = 'youtube'
@@ -34,8 +30,6 @@ with open('secret.json') as f:
 DEVELOPER_KEY = secret['KEY']
 CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
 
-
-
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES_ANALYTICS)
 flow.redirect_uri = 'http://localhost:8501'
 
@@ -45,12 +39,9 @@ authorization_url, state = flow.authorization_url(
     include_granted_scopes='true'
 )
 
-
 st.set_page_config(
     layout="wide"
 )
-
-
 
 st.title("Youtube分析ダッシュボード")
 
@@ -61,9 +52,8 @@ pages = [
 ]
 st.sidebar.title('メニュー')
 selection_analytics = st.sidebar.radio("選択してください。", pages)
-
-
 st.sidebar.button("リロード")
+
 
 if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_state:
     try:
@@ -79,8 +69,6 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
             credentials = flow.credentials
             st.session_state['credentials']=mf.credentials_to_dict(credentials)
             st.balloons()
-
-
 
         youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
         youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
@@ -112,7 +100,7 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 
     except googleapiclient.errors.HttpError:
         traceback.print_exc()
-        st.write("APIクォータの消費量が最大値を超えたためエラーが発生しました。")
+        st.write("APIクォータの消費量が最大値を超えたか、APIのリクエストに問題が発生しました。")
 
     except Exception as e:
         traceback.print_exc()

@@ -1,9 +1,10 @@
-import app as ap
+import streamlit as st
 import pandas as pd
 import plotly.express as px
-import streamlit as st
 import datetime
+import app as ap
 import my_function as mf
+
 
 def channel_basis_reports(youtube_analytics,start_date,end_date):
     channel_analytics = mf.execute_api_request(
@@ -15,11 +16,10 @@ def channel_basis_reports(youtube_analytics,start_date,end_date):
         dimensions='channel',
     )
     channel_basis_data = channel_analytics['rows'][0]
-
-
     channel_basis_data.pop(0)
     channel_basis_data = pd.Series(channel_basis_data, index=['視聴回数','視聴時間(時間)','高評価','低評価','コメント','シェア','チャンネル登録回数'])
     return channel_basis_data
+
 
 def age_gender_graph(youtube_analytics,start_date,end_date):
     age_gender = mf.execute_api_request(
@@ -31,7 +31,6 @@ def age_gender_graph(youtube_analytics,start_date,end_date):
     metrics='viewerPercentage',
     sort='gender,ageGroup'
     )
-
     age_gender = age_gender['rows']
 
     Character = ["男性","女性"]
@@ -48,13 +47,10 @@ def age_gender_graph(youtube_analytics,start_date,end_date):
         Parent.append(age_gender[i][1])
         Value.append(age_gender[i][2])
 
-
-
     data = dict(
     character=Character,
     parent=Parent,
     value=Value)
-
     fig = px.sunburst(
         data,
         names='character',
@@ -62,6 +58,7 @@ def age_gender_graph(youtube_analytics,start_date,end_date):
         values='value',
     )
     return fig
+
 
 def channel_basis_graph(youtube_analytics,start_date,end_date):
     Channel_report_response = mf.execute_api_request(
@@ -74,6 +71,7 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
     sort='day'
     )
     Channel_report_response = Channel_report_response['rows']
+
     Channel_report = {}
     day = []
     view = []
@@ -117,6 +115,7 @@ def channel_basis_graph(youtube_analytics,start_date,end_date):
 
     return fig_view,fig_watch_hour,fig_subscriber
 
+
 def country_analysis(youtube_analytics,start_date,end_date):
     result = mf.execute_api_request(
         youtube_analytics.reports().query,
@@ -127,13 +126,12 @@ def country_analysis(youtube_analytics,start_date,end_date):
         metrics='views,estimatedMinutesWatched,averageViewDuration',
         sort='-estimatedMinutesWatched'
     )
-
     result = result['rows']
+
     country_list = []
     view_list = []
     watch_minute_list = []
     average_watch_time_list = []
-
 
     for i in range(len(result)):
         country_list.append(mf.country_name(result[i][0]))
@@ -141,8 +139,6 @@ def country_analysis(youtube_analytics,start_date,end_date):
         watch_minute_list.append(round(result[i][2] / 60,1))
         average_time = str(datetime.timedelta(seconds=result[i][3]))
         average_watch_time_list.append(average_time)
-
-
 
     df_country = pd.DataFrame(
         data = {'国名' : country_list,
@@ -152,7 +148,9 @@ def country_analysis(youtube_analytics,start_date,end_date):
         }
     )
     df_country = df_country.style.format(formatter={('視聴時間(時間)'): "{:.1f}"})
+
     return df_country
+
 
 def device_analysis(youtube_analytics,start_date,end_date):
     device_type_response = mf.execute_api_request(
@@ -161,10 +159,10 @@ def device_analysis(youtube_analytics,start_date,end_date):
         startDate=start_date,
         endDate=end_date,
         dimensions='deviceType',
-        metrics='views',
-        # sort='-shares'
+        metrics='views'
     )
     device_type_response = device_type_response['rows']
+
     device_name = []
     device_views = []
     for i in range(len(device_type_response)):
@@ -175,7 +173,9 @@ def device_analysis(youtube_analytics,start_date,end_date):
             '視聴回数' : device_views
         }
     )
+
     return df_device_type
+
 
 def traffic_source_analysis(youtube_analytics,start_date,end_date):
     traffic_source_type_response = mf.execute_api_request(
@@ -188,6 +188,7 @@ def traffic_source_analysis(youtube_analytics,start_date,end_date):
         sort='-views'
     )
     traffic_source_type_response = traffic_source_type_response['rows']
+
     traffic_source_name = []
     traffic_source_views = []
     traffic_source_persenstages = []
@@ -205,10 +206,11 @@ def traffic_source_analysis(youtube_analytics,start_date,end_date):
             '視聴回数' : traffic_source_views,
             '' : traffic_source_persenstages
     })
+
     return df_traffic_source_type
 
-def search_word_analysis(youtube_analytics,start_date,end_date):
 
+def search_word_analysis(youtube_analytics,start_date,end_date):
     search_word_response = mf.execute_api_request(
         youtube_analytics.reports().query,
         ids='channel==MINE',
@@ -216,21 +218,23 @@ def search_word_analysis(youtube_analytics,start_date,end_date):
         endDate=end_date,
         dimensions='insightTrafficSourceDetail',
         metrics='views',
-        # filters='video==lOUzyycfXHw;insightTrafficSourceType==YT_SEARCH',
         filters='insightTrafficSourceType==YT_SEARCH',
         maxResults=25,
         sort='-views'
     )
     search_word_response = search_word_response['rows']
+
     search_word_name = []
     search_word_views = []
     search_word_persenstages = []
     search_word_sum = 0
+
     for i in range(len(search_word_response)):
         search_word_sum += search_word_response[i][1]
+
     for i in range(len(search_word_response)):
         search_word_name.append(search_word_response[i][0])
-        search_word_views.append(search_word_response[i][1])   
+        search_word_views.append(search_word_response[i][1])
         search_word_persenstage = round((int(search_word_response[i][1]) / search_word_sum)*100,1)
         search_word_persenstages.append(f'{search_word_persenstage}' + '%')
     df_search_word_response = pd.DataFrame(
@@ -241,17 +245,18 @@ def search_word_analysis(youtube_analytics,start_date,end_date):
 
     return df_search_word_response
 
-def app_channel(youtube_analytics,start_date,end_date,period):
 
-    channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
+def app_channel(youtube_analytics,start_date,end_date,period):
 
     if period == 'カスタム':
         st.markdown('## 選択した期間中')
     else:
         st.markdown(f'## {period}の期間中')
 
+    channel_basis_data = channel_basis_reports(youtube_analytics,start_date,end_date)
+
     video_views = channel_basis_data[0]
-    video_hourWatched = round(channel_basis_data[1] / 60,1)
+    video_hour_watched = round(channel_basis_data[1] / 60,1)
     video_likes = channel_basis_data[2]
     video_dislikes = channel_basis_data[3]
     video_comments = channel_basis_data[4]
@@ -259,48 +264,48 @@ def app_channel(youtube_analytics,start_date,end_date,period):
     video_subscriber = channel_basis_data[6]
 
     st.markdown(f'###### 視聴回数  :  {video_views}回')
-    st.markdown(f'###### 視聴時間  :  {video_hourWatched}時間')
+    st.markdown(f'###### 視聴時間  :  {video_hour_watched}時間')
     st.markdown(f'###### 高評価    : {video_likes}個')
     st.markdown(f'###### 低評価    : {video_dislikes}個')
     st.markdown(f'###### コメント  : {video_comments}個')
     st.markdown(f'###### 共有      : {video_shares}回')
     st.markdown(f'###### 登録者数  : {video_subscriber}人')
 
-
     channel_basis_graphs=channel_basis_graph(youtube_analytics,start_date,end_date)
 
     channel_view = channel_basis_graphs[0]
     channel_watch_hour = channel_basis_graphs[1]
-
-    col1, col2= st.columns(2)
-    with col1:
-        st.plotly_chart(channel_view, use_container_width=True)
-    with col2:
-        st.plotly_chart(channel_watch_hour, use_container_width=True)
-
-
     channel_subscriber = channel_basis_graphs[2]
-    channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
 
+    graphs = [
+        "視聴回数",
+        "視聴時間",
+        "登録者数"
+    ]
+    selection_graph = st.radio("表示したいグラフを選択してください。", graphs)
+    if selection_graph == "視聴回数":
+        st.plotly_chart(channel_view, use_container_width=True)
+    elif selection_graph == "視聴時間":
+        st.plotly_chart(channel_watch_hour, use_container_width=True)
+    elif selection_graph == "登録者数":
+        st.plotly_chart(channel_subscriber, use_container_width=True)
+
+    channel_age_gender_graph = age_gender_graph(youtube_analytics,start_date,end_date)
+    df_channel_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
     col1, col2= st.columns(2)
     with col1:
-        st.plotly_chart(channel_subscriber, use_container_width=True)
-    with col2:
         st.plotly_chart(channel_age_gender_graph, use_container_width=True)
-
+    with col2:
+        st.dataframe(df_channel_traffic_source)
 
     df_country = country_analysis(youtube_analytics,start_date,end_date)
     df_device = device_analysis(youtube_analytics,start_date,end_date)
-    df_channel_traffic_source = traffic_source_analysis(youtube_analytics,start_date,end_date)
     df_channel_search_word  = search_word_analysis(youtube_analytics,start_date,end_date)
-    
     col1, col2,col3= st.columns(3)
     with col1:
         st.dataframe(df_country)
     with col2:
         st.dataframe(df_device)
     with col3:
-        st.dataframe(df_channel_traffic_source)
-    
-    st.dataframe(df_channel_search_word)
-    
+        st.dataframe(df_channel_search_word)
+
