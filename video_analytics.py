@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import datetime
 import re
-import app as ap
 import my_function as mf
 
 def ids_titles_function(youtube_analytics,start_date,youtube,max_results=50):
@@ -378,10 +377,14 @@ def app_video(youtube_analytics,youtube,start_date,end_date,period):
     st.plotly_chart(viewing_graph, use_container_width=True)
 
     video_age_gender_graph= age_gender_graph_video(youtube_analytics,start_date,end_date,video_id)
-    st.write(video_age_gender_graph)
-
     df_video_traffic_source= traffic_source_analysis(youtube_analytics,start_date,end_date,video_id)
-    st.dataframe(df_video_traffic_source)
-
     df_video_search_word  = search_word_analysis(youtube_analytics,start_date,end_date,video_id)
-    st.dataframe(df_video_search_word)
+
+    col1, col2= st.columns(2)
+    with col1:
+        st.dataframe(df_video_traffic_source)
+        st.write(video_age_gender_graph)
+    with col2:
+        st.dataframe(df_video_search_word)
+
+

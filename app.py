@@ -15,8 +15,6 @@ from googleapiclient.discovery import build
 import googleapiclient
 
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
 SCOPES_ANALYTICS = ['https://www.googleapis.com/auth/yt-analytics.readonly']
 API_SERVICE_NAME_ANALYTICS = 'youtubeAnalytics'
 API_VERSION_ANALYTICS = 'v2'
@@ -25,19 +23,21 @@ SCOPES_YOUTUBE= ['https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME_YOUYUBE = 'youtube'
 API_VERSION_YOUYUBE = 'v3'
 
-with open('secret.json') as f:
+with open('secret.json') as f:#ダウンロードしたYoutubeDataAPIキーのjsonファイルを指定
     secret = json.load(f)
 DEVELOPER_KEY = secret['KEY']
-CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'
+CLIENT_SECRETS_FILE = 'YOUR_CLIENT_SECRET_FILEwebapp.json'#ダウンロードしたOAuthクライアントのjsonファイルを指定
 
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES_ANALYTICS)
 flow.redirect_uri = 'http://localhost:8501'
 
+#認証用のurlを作成
 authorization_url, state = flow.authorization_url(
     access_type='offline',
     login_hint='ryou110216@yahoo.co.jp',
     include_granted_scopes='true'
 )
+
 
 st.set_page_config(
     layout="wide"
@@ -63,15 +63,15 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
             st.session_state['credentials']=mf.credentials_to_dict(credentials)
 
         else:
-            authorization_response = st.experimental_get_query_params()['code']
-            authorization_response=authorization_response[0]
-            flow.fetch_token(code=authorization_response)
+            authorization_response = st.experimental_get_query_params()['code']#クエリパラメータの認証コードを取得
+            authorization_response=authorization_response[0]#リスト形式になっているので取り出す
+            flow.fetch_token(code=authorization_response)#コードと認証トークンを交換する
             credentials = flow.credentials
             st.session_state['credentials']=mf.credentials_to_dict(credentials)
             st.balloons()
 
-        youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)
-        youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)
+        youtube_analytics = build(API_SERVICE_NAME_ANALYTICS, API_VERSION_ANALYTICS, credentials = credentials,cache_discovery=False)#youtube_analyticsインスタンスを作成
+        youtube = build(API_SERVICE_NAME_YOUYUBE, API_VERSION_YOUYUBE,  developerKey=DEVELOPER_KEY)#YouTubeDateインスタンスを作成
 
         if selection_analytics =="チャンネルのアナリティクス" or selection_analytics =="動画のアナリティクス":
             period = st.selectbox('期間を指定してください。',('過去7日間','過去30日間','過去180日間','過去360日間','全期間','カスタム'))
@@ -114,3 +114,4 @@ if 'code' in st.experimental_get_query_params() or  'credentials' in st.session_
 else:
     st.write(mf.get_login_str(authorization_url),unsafe_allow_html=True)
     st.write("リンクから認証を行ってください。")
+    pass

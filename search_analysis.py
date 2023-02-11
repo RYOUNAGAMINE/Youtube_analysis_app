@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import datetime
-import app as ap
 import my_function as mf
 
 def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
@@ -19,7 +17,7 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
         item_id = {}
         item_id['video_id'] = item['id']['videoId']
         item_id['channel_id'] = item['snippet']['channelId']
-        if len(items_id) <= 50:#video_searchでmax_resultsを50にしても51個のデータを取ってくることがあるため
+        if len(items_id) <= 49:#video_searchでmax_resultsを50にしても51個のデータを取ってくることがあるため
             items_id.append(item_id)
     df_video_channel_ids = pd.DataFrame(items_id)
 
@@ -28,8 +26,6 @@ def video_search(youtube, q = "沖縄 フカセ釣り", max_results=50):
 def get_results(df_video,youtube,limiter):
     channel_ids = df_video['channel_id'].tolist()
 
-    print(channel_ids)
-    print(len(channel_ids))
     subscriber_list = youtube.channels().list(
     id=','.join(channel_ids),
     part='snippet,statistics',

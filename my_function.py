@@ -4,9 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def get_login_str(authorization_url):
-    return f'''
-    <a target="_self"
-    href="{authorization_url}">Google login</a>'''
+    return f'<a target="_self" href="{authorization_url}">Google login</a>'
 
 
 def execute_api_request(client_library_function, **kwargs):
