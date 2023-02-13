@@ -1,0 +1,2 @@
+# Youtube_analysis_app
+自分のチャンネルのコンテンツを分析する
