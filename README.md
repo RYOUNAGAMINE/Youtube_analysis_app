@@ -1,9 +1,9 @@
-![](https://img.shields.io/github/repo-size/RYOUNAGAMINE/Youtube_analysis_app){:target="_blank"}
-[![](https://img.shields.io/badge/YouTube-DataAPI-red)](https://developers.google.com/youtube/v3){:target="_blank"}
-[![](https://img.shields.io/badge/YouTube-AnalyticsAPI-red)](https://developers.google.com/youtube/analytics){:target="_blank"}
-![](https://img.shields.io/github/languages/top/RYOUNAGAMINE/Youtube_analysis_app){:target="_blank"}
-![](https://img.shields.io/github/languages/count/RYOUNAGAMINE/Youtube_analysis_app){:target="_blank"}
-![](https://img.shields.io/github/stars/RYOUNAGAMINE/Youtube_analysis_app?style=social){:target="_blank"}
+![](https://img.shields.io/github/repo-size/RYOUNAGAMINE/Youtube_analysis_app)
+[![](https://img.shields.io/badge/YouTube-DataAPI-red)](https://developers.google.com/youtube/v3)
+[![](https://img.shields.io/badge/YouTube-AnalyticsAPI-red)](https://developers.google.com/youtube/analytics)
+![](https://img.shields.io/github/languages/top/RYOUNAGAMINE/Youtube_analysis_app)
+![](https://img.shields.io/github/languages/count/RYOUNAGAMINE/Youtube_analysis_app)
+![](https://img.shields.io/github/stars/RYOUNAGAMINE/Youtube_analysis_app?style=social)
 # Youtube_analysis_app
 自身のYoutubeチャンネルや動画を分析する
 
