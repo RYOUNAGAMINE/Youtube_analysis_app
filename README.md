@@ -1,3 +1,4 @@
+![](https://img.shields.io/github/repo-size/RYOUNAGAMINE/Youtube_analysis_app)
 # Youtube_analysis_app
 自身のYoutubeチャンネルや動画を分析する
 
@@ -88,6 +89,6 @@ pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2
 - 作成者:長嶺亮
 - Email:ryou110216@yahoo.co.jp
 ## ライセンス
-
+![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)
 ## 参考文献
 
