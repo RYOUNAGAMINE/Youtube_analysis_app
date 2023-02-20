@@ -2,7 +2,7 @@
 自身のYoutubeチャンネルや動画を分析する
 
 ## デモ
-
+![demo](https://user-images.githubusercontent.com/103870534/220037587-5e03ae9a-5da3-4e12-85c0-bda259783ea1.gif)
 ## 機能
 - *自身のユーチューブチャンネルアナリティクス分析*
     - 分析する期間の指定機能
