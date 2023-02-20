@@ -1,4 +1,6 @@
 ![](https://img.shields.io/github/repo-size/RYOUNAGAMINE/Youtube_analysis_app)
+[![](https://img.shields.io/badge/YouTube-DataAPI-red)](https://developers.google.com/youtube/v3)
+[![](https://img.shields.io/badge/YouTube-AnalyticsAPI-red)](https://developers.google.com/youtube/analytics)
 # Youtube_analysis_app
 自身のYoutubeチャンネルや動画を分析する
 
