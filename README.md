@@ -89,6 +89,6 @@ pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2
 - 作成者:長嶺亮
 - Email:ryou110216@yahoo.co.jp
 ## ライセンス
-![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)
+[![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)](LICENSE)
 ## 参考文献
 
