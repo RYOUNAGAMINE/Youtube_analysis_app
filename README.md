@@ -8,9 +8,20 @@
 自身のYoutubeチャンネルや動画を分析する
 
 ## 目次
-- [デモ](#デモ)
+- [Youtube\_analysis\_app](#youtube_analysis_app)
+  - [目次](#目次)
+  - [デモ](#デモ)
+  - [機能](#機能)
+  - [使い方](#使い方)
+  - [環境](#環境)
+  - [注意事項](#注意事項)
+  - [文責](#文責)
+  - [ライセンス](#ライセンス)
+  - [参考文献](#参考文献)
+
 ## デモ
 ![demo](https://user-images.githubusercontent.com/103870534/220037587-5e03ae9a-5da3-4e12-85c0-bda259783ea1.gif)
+
 ## 機能
 - *自身のユーチューブチャンネルアナリティクス分析*
     - 分析する期間の指定機能
@@ -44,7 +55,6 @@
     - 分析できるアナリティクス
         <details>
         <summary>表示</summary>
-
         - 基本的なアナリティクス
             - 視聴回数
             - 視聴回数
@@ -78,6 +88,7 @@
         - チャンネル名
         - チャンネル登録者数
         </details>
+
 ## 使い方
 
 ```bash
@@ -90,12 +101,15 @@ pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2
 ```
 ## 環境
 - Python 3.10.7
+
 ## 注意事項
 
 ## 文責
 - 作成者:長嶺亮
 - Email:ryou110216@yahoo.co.jp
+
 ## ライセンス
 [![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)](LICENSE)
+
 ## 参考文献
 
