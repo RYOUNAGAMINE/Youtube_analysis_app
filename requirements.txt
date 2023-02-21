@@ -1,0 +1,8 @@
+streamlit==1.17.0
+pandas==1.5.0
+plotly==5.11.0
+python-dateutil==2.8.2
+google-api-python-client==2.71.0
+google-auth-oauthlib==0.8.0
+google-auth==2.15.0
+google-auth-httplib2==0.1.0
