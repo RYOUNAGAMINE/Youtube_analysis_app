@@ -9,11 +9,11 @@
 
 ## 目次
 - [Youtube\_analysis\_app](#youtube_analysis_app)
+  - [目次](#目次)
   - [デモ](#デモ)
   - [機能](#機能)
   - [使い方](#使い方)
   - [環境](#環境)
-  - [注意事項](#注意事項)
   - [文責](#文責)
   - [ライセンス](#ライセンス)
   - [参考文献](#参考文献)
@@ -117,7 +117,6 @@ streamlit run app.py
 - Windows
 - Python 3.10.7
 
-## 注意事項
 
 ## 文責
 - 作成者:長嶺亮
@@ -127,4 +126,6 @@ streamlit run app.py
 [![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)](LICENSE)
 
 ## 参考文献
-
+以下の情報を参考にして執筆しました。
+- [YouTube Data API 公式ドキュメント](https://developers.google.com/youtube/v3)
+- [YouTube Analytics and Reporting APIs 公式ドキュメント](https://developers.google.com/youtube/analytics)
