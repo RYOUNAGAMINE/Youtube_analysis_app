@@ -132,6 +132,6 @@ streamlit run app.py
 [![](https://img.shields.io/github/license/RYOUNAGAMINE/Youtube_analysis_app)](LICENSE)
 
 ## 参考文献
-以下の情報を参考にして執筆しました。
+以下の情報を参考にしました。
 - [YouTube Data API 公式ドキュメント](https://developers.google.com/youtube/v3)
 - [YouTube Analytics and Reporting APIs 公式ドキュメント](https://developers.google.com/youtube/analytics)
