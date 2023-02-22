@@ -94,8 +94,13 @@
 git clone https://github.com/RYOUNAGAMINE/Youtube_analysis_app.git
 ```
 
+クローンしたリポジトリに移動する。
+```bash
+cd Youtube_analysis_app
+```
 
-クローンしたリポジトリで以下のコードし、必要なパッケージをインストールします。
+
+以下のコードを実行し、必要なパッケージをインストールします。
 ```bash
 pip install -r requirements.txt
 ```
