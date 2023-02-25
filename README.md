@@ -113,7 +113,7 @@ GoogleCloudPlatformのコンソール画面にて、YouTube Data API v3を有効
 取得したAPIキーはクローンしたリポジトリに"secret.json"として保存します。
 ```json
 {
-    KEY: "取得したAPIキーを入力"
+    "KEY": "取得したAPIキーを入力"
 }
 ```
 GoogleCloudPlatformのコンソール画面にて、YouTube Analytics API を有効化しOAuthクライアントを作成します。
