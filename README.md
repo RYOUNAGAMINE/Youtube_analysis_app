@@ -95,7 +95,7 @@
 git clone https://github.com/RYOUNAGAMINE/Youtube_analysis_app.git
 ```
 
-クローンしたリポジトリに移動する。
+クローンしたリポジトリに移動してください。
 ```bash
 cd Youtube_analysis_app
 ```
@@ -108,10 +108,17 @@ pip install -r requirements.txt
 
 
 
-GoogleCloudPlatformのコンソール画面にて、YouTube Analytics APIとYouTube Data API v3を有効にする。
-
-APIキーを取得し、クローンしたリポジトリに"secret.json"として保存する。
-OAuthクライアントIDの認証情報を取得し、クローンしたリポジトリに"YOUR_CLIENT_SECRET_FILEwebapp.json"として保存する。
+GoogleCloudPlatformのコンソール画面にて、YouTube Data API v3を有効化しAPIキーを取得します。
+詳細についてはこちら[「YouTubeDataAPIの有効化とAPIキーを取得する。」](https://naga-tech.jp/160/)を参照してください。
+取得したAPIキーはクローンしたリポジトリに"secret.json"として保存します。
+```json
+{
+    KEY: "取得したAPIキーを入力"
+}
+```
+GoogleCloudPlatformのコンソール画面にて、YouTube Analytics API を有効化しOAuthクライアントを作成します。
+詳細についてはこちら[「YouTubeAnalyticsAPIの有効化とOAuthクライアントを作成する。」](https://naga-tech.jp/104/)を参照してください。
+ダウンロードしたOAuthクライアントの認証情報を、クローンしたリポジトリに"YOUR_CLIENT_SECRET_FILEwebapp.json"として保存する。
 
 
 
