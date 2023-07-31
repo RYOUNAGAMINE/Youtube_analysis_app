@@ -109,7 +109,7 @@ pip install -r requirements.txt
 
 
 GoogleCloudPlatformのコンソール画面にて、YouTube Data API v3を有効化しAPIキーを取得します。
-詳細についてはこちら[「YouTubeDataAPIの有効化とAPIキーを取得する。」](https://naga-tech.jp/160/)を参照してください。
+詳細についてはこちら[「YouTubeDataAPIの有効化とAPIキーを取得する。」]([https://naga-tech.jp/160/](https://qiita.com/ryou110216/items/181296d7eaf83d405754))を参照してください。
 取得したAPIキーはクローンしたリポジトリに"secret.json"として保存します。
 ```json:secret.json
 {
@@ -117,7 +117,7 @@ GoogleCloudPlatformのコンソール画面にて、YouTube Data API v3を有効
 }
 ```
 GoogleCloudPlatformのコンソール画面にて、YouTube Analytics API を有効化しOAuthクライアントを作成します。
-詳細についてはこちら[「YouTubeAnalyticsAPIの有効化とOAuthクライアントを作成する。」](https://naga-tech.jp/104/)を参照してください。
+詳細についてはこちら[「YouTubeAnalyticsAPIの有効化とOAuthクライアントを作成する。」](https://qiita.com/ryou110216/items/73df6f8e6764549edf0b)を参照してください。
 ダウンロードしたOAuthクライアントの認証情報を、クローンしたリポジトリに"YOUR_CLIENT_SECRET_FILEwebapp.json"として保存する。
 
 
