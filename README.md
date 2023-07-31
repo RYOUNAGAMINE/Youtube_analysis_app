@@ -109,7 +109,7 @@ pip install -r requirements.txt
 
 
 GoogleCloudPlatformのコンソール画面にて、YouTube Data API v3を有効化しAPIキーを取得します。
-詳細についてはこちら[「YouTubeDataAPIの有効化とAPIキーを取得する。」]([https://naga-tech.jp/160/](https://qiita.com/ryou110216/items/181296d7eaf83d405754))を参照してください。
+詳細についてはこちら[「YouTubeDataAPIの有効化とAPIキーを取得する。」](https://qiita.com/ryou110216/items/181296d7eaf83d405754)を参照してください。
 取得したAPIキーはクローンしたリポジトリに"secret.json"として保存します。
 ```json:secret.json
 {
